@@ -2,7 +2,7 @@
 title: Beringei时序数据库
 date: 2017-03-13 08:18:16
 comments: true
-categories: 数据
+categories: 大数据
 tags: [数据库, 时序, Beringei, facebook]
 ---
 

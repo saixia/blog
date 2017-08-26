@@ -2,7 +2,7 @@
 title: 数据系统架构之Lambda architecture
 date: 2016-06-28 19:53:05
 comments: true
-categories: 数据
+categories: 大数据
 tags: [Lambda architecture, 数据架构]
 ---
 
