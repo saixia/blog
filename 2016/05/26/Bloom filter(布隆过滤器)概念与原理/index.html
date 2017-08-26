@@ -71,7 +71,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="blog,hexo,建站," />
+  <meta name="keywords" content="概率统计原理,实时计算,Bloom filter,布隆过滤器," />
 
 
 
@@ -87,18 +87,20 @@
 
 
 
-<meta name="description" content="为什么要建立自己的博客一直以来纠结于在哪里写博客，曾经使用过CSDN、阿里云溪社区等博客空间，都觉得不是非常满意。曾觉得搭建一个Web服务、购买DNS域名比较麻烦，一直想搭建一个只属于我自己的个人网站，又未动手搭建。但最终在Hexo和Jark个人博客的诱惑下，周末搞了一天把博客弄出来了（发现好多想法都与Jark不谋而合）。从购买域名，选择网站发布方式，又捣鼓主题，整个过程还是非常有意思。最终感觉搭">
-<meta name="keywords" content="blog,hexo,建站">
+<meta name="description" content="写在前面在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计">
+<meta name="keywords" content="概率统计原理,实时计算,Bloom filter,布隆过滤器">
 <meta property="og:type" content="article">
-<meta property="og:title" content="自由博客之路">
-<meta property="og:url" content="http://saixia.me/2015/06/18/自由博客之路/index.html">
+<meta property="og:title" content="Bloom filter(布隆过滤器)概念与原理">
+<meta property="og:url" content="http://saixia.me/2016/05/26/Bloom filter(布隆过滤器)概念与原理/index.html">
 <meta property="og:site_name" content="Seth&#39;s blog">
-<meta property="og:description" content="为什么要建立自己的博客一直以来纠结于在哪里写博客，曾经使用过CSDN、阿里云溪社区等博客空间，都觉得不是非常满意。曾觉得搭建一个Web服务、购买DNS域名比较麻烦，一直想搭建一个只属于我自己的个人网站，又未动手搭建。但最终在Hexo和Jark个人博客的诱惑下，周末搞了一天把博客弄出来了（发现好多想法都与Jark不谋而合）。从购买域名，选择网站发布方式，又捣鼓主题，整个过程还是非常有意思。最终感觉搭">
+<meta property="og:description" content="写在前面在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-08-26T04:33:30.000Z">
+<meta property="og:image" content="http://saixia.me/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
+<meta property="og:updated_time" content="2017-08-26T06:29:32.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="自由博客之路">
-<meta name="twitter:description" content="为什么要建立自己的博客一直以来纠结于在哪里写博客，曾经使用过CSDN、阿里云溪社区等博客空间，都觉得不是非常满意。曾觉得搭建一个Web服务、购买DNS域名比较麻烦，一直想搭建一个只属于我自己的个人网站，又未动手搭建。但最终在Hexo和Jark个人博客的诱惑下，周末搞了一天把博客弄出来了（发现好多想法都与Jark不谋而合）。从购买域名，选择网站发布方式，又捣鼓主题，整个过程还是非常有意思。最终感觉搭">
+<meta name="twitter:title" content="Bloom filter(布隆过滤器)概念与原理">
+<meta name="twitter:description" content="写在前面在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计">
+<meta name="twitter:image" content="http://saixia.me/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
 
 
 
@@ -126,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://saixia.me/2015/06/18/自由博客之路/"/>
+  <link rel="canonical" href="http://saixia.me/2016/05/26/Bloom filter(布隆过滤器)概念与原理/"/>
 
 
 
 
 
-  <title> 自由博客之路 | Seth's blog </title>
+  <title> Bloom filter(布隆过滤器)概念与原理 | Seth's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -301,7 +303,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://saixia.me/2015/06/18/自由博客之路/">
+    <link itemprop="mainEntityOfPage" href="http://saixia.me/2016/05/26/Bloom filter(布隆过滤器)概念与原理/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="saixia">
@@ -322,7 +324,7 @@
             
             
               
-                自由博客之路
+                Bloom filter(布隆过滤器)概念与原理
               
             
           </h1>
@@ -337,8 +339,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-06-18T13:14:05+08:00">
-                2015-06-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-26T00:02:18+08:00">
+                2016-05-26
               </time>
             
 
@@ -360,8 +362,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/other/" itemprop="url" rel="index">
-                    <span itemprop="name">other</span>
+                  <a href="/categories/大数据/" itemprop="url" rel="index">
+                    <span itemprop="name">大数据</span>
                   </a>
                 </span>
 
@@ -379,8 +381,8 @@
                 <i class="fa fa-comment-o"></i>
               </span>
               
-                <a href="/2015/06/18/自由博客之路/#SOHUCS" itemprop="discussionUrl">
-                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2015/06/18/自由博客之路/" itemprop="commentsCount"></span>
+                <a href="/2016/05/26/Bloom filter(布隆过滤器)概念与原理/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2016/05/26/Bloom filter(布隆过滤器)概念与原理/" itemprop="commentsCount"></span>
                 </a>
               
             
@@ -388,7 +390,7 @@
 
           
           
-             <span id="/2015/06/18/自由博客之路/" class="leancloud_visitors" data-flag-title="自由博客之路">
+             <span id="/2016/05/26/Bloom filter(布隆过滤器)概念与原理/" class="leancloud_visitors" data-flag-title="Bloom filter(布隆过滤器)概念与原理">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -417,52 +419,20 @@
       
 
       
-        <h2 id="为什么要建立自己的博客"><a href="#为什么要建立自己的博客" class="headerlink" title="为什么要建立自己的博客"></a>为什么要建立自己的博客</h2><p>一直以来纠结于在哪里写博客，曾经使用过CSDN、阿里云溪社区等博客空间，都觉得不是非常满意。曾觉得搭建一个Web服务、购买DNS域名比较麻烦，一直想搭建一个只属于我自己的个人网站，又未动手搭建。但最终在<a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>和<a href="http://wuchong.me/" target="_blank" rel="external">Jark个人博客</a>的诱惑下，周末搞了一天把博客弄出来了（发现好多想法都与Jark不谋而合）。从购买域名，选择网站发布方式，又捣鼓主题，整个过程还是非常有意思。最终感觉搭建一个属于自己的个人网站，也没有想象的那么难、那么复杂，如果您也渴望拥有属于自己的个人网站，请马上行动起来。  </p>
-<p>之所以要一个独立的博客，我觉得一下几个原因在驱动我：</p>
-<ol>
-<li><strong>独立，自由，简介：</strong> 自己的博客可以根据自己的喜好选择主题，博客整体整洁，不会出现广告满天飞舞；  </li>
-<li><strong>够酷：</strong> 能有一个专属自己的域名。既是是saixia.github.com，那我也觉得自己是在别人的地上种菜。一定要saixia.me，才是自家的地；  </li>
-<li><strong>自我驱动：</strong> 在自家的菜园子里种菜，总是比在他人菜地种菜要有激情。同时在自我总结的过程中，将知识沉淀下来，自我提升。最近学习NLP希望自己能够坚持下来；  </li>
-<li><strong>回馈精神：</strong> 在互联网时代，应为大家的分享，让我们的生活方式发生了非常大的变化。我们不断从网络获取知识，当然也要回馈于网络；  </li>
-<li><strong>成长的印记：</strong> 分享的过程中间，记录下自己和家人的成长历程。  </li>
-</ol>
-<h2 id="Hexo你的博客"><a href="#Hexo你的博客" class="headerlink" title="Hexo你的博客"></a>Hexo你的博客</h2><p>为什么是Hexo？Hexo是一个快速、简洁且高效的博客框架。而且可以使用markdown解析文章，在几秒内，即可利用靓丽的主题生成静态网页<a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="external">引用于Hexo文档</a>。通过网络查看Hexo的评价，获得各位自由博客人的一致好评，最终确定采用Hexo搭建自己的博客。网站的搭建过程网络上有非常都的文章，我在此就不班门弄斧了。当然为方便您的建站，我会在文章末尾列举出我的建站过程中所参考的文章。  </p>
-<p>以下主要谈谈建站的主要流程和自己的感受：<br><strong>1. 安装Node：</strong> Hexo框架依赖与Node JS，直接按照Hexo文档安装就ok；<br><strong>2. 安装git、注册GitHub：</strong> 用来推送代码和托管网站（Github是国外的，国内也可以考虑GitCafe部署代码）。注意：Hexo部署代码的时候不要使用git push代码，需要采用Hexo deploy。代码中需要添加CNAME文件，配置主页地址（如：我的是saixia.me），github需要将网站项目发布为一个GitHub Pages；<br><strong>3. 域名申请：</strong> 国内域名申请推荐使用阿里云旗下的<a href="https://wanwang.aliyun.com/domain/" target="_blank" rel="external">万网</a>和腾讯云旗下的<a href="https://www.dnspod.cn/" target="_blank" rel="external">dnspod</a>，我采用的是阿里云旗下的万网，域名申请以后需要配置github的访问地址；<br><strong>4. 构建自己的网站</strong> 按照Hexo的说明文档初始化一个Hexo项目，然后部署到github上。中间需要修改hexo的deploy配置。 </p>
-<p>可以跟进自己的需要捣鼓自己喜欢的主题，如果你是前端高手，还可以开发自己喜欢的主题。希望您的加入让Hexo主题更加丰富。你也可以根据自己的需要添加评论去，本文采用commentit作为评论的模块。因为本人对js不熟悉，花了较多的时间调整。目前评论模块还没有搞好。</p>
-<p>博客迁移：</p>
-<ol>
-<li>下载source、themes、_config.yml;</li>
-<li>hexo init初始化一个项目；</li>
-<li>替换1步中下载的文件；</li>
-<li>初始化git代码库：git init -&gt; git add . -&gt; git commit -m ‘注释’ 提交代码</li>
-<li>添加远程仓库地址：git remote add origin url；</li>
-<li>推送到远程仓库：git push origin master:hexo;(我用hexo分之存储源文件)</li>
-</ol>
-<p>package.json里的内容为：记录一下自己的插件配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  &quot;name&quot;: &quot;hexo-site&quot;,</div><div class="line">  &quot;version&quot;: &quot;0.0.0&quot;,</div><div class="line">  &quot;private&quot;: true,</div><div class="line">  &quot;hexo&quot;: &#123;</div><div class="line">    &quot;version&quot;: &quot;3.3.8&quot;</div><div class="line">  &#125;,</div><div class="line">  &quot;dependencies&quot;: &#123;</div><div class="line">    &quot;hexo&quot;: &quot;^3.2.0&quot;,</div><div class="line">    &quot;hexo-asset-image&quot;: &quot;0.0.3&quot;,</div><div class="line">    &quot;hexo-deployer-git&quot;: &quot;^0.3.1&quot;,</div><div class="line">    &quot;hexo-generator-archive&quot;: &quot;^0.1.4&quot;,</div><div class="line">    &quot;hexo-generator-category&quot;: &quot;^0.1.3&quot;,</div><div class="line">    &quot;hexo-generator-index&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-generator-search&quot;: &quot;^2.1.1&quot;,</div><div class="line">    &quot;hexo-generator-tag&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-renderer-ejs&quot;: &quot;^0.3.0&quot;,</div><div class="line">    &quot;hexo-renderer-marked&quot;: &quot;^0.3.0&quot;,</div><div class="line">    &quot;hexo-renderer-stylus&quot;: &quot;^0.3.1&quot;,</div><div class="line">    &quot;hexo-server&quot;: &quot;^0.2.2&quot;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h2 id="留言添加"><a href="#留言添加" class="headerlink" title="留言添加"></a>留言添加</h2><p>为了使博客支持评价，我尝试了很多种评价系统，要么就是评价提供不提供服务、要么就是服务器在国外访问太慢等种种原因。最终我选择了畅言，不过畅言评论平台需要提供备案号。为此我还专门在阿里云上进行了备案，备案还比较简单，就是需要提供一堆的材料，然后就是等各部门审核。整个过程花费了一个多月的时间，备案大概需要花费了十几元。注释：备案是指域名的备案。</p>
-<p>畅言评论的支持具体的添加方式，本文就不做详细讲解，畅言平台的帮助文档里面有详细的添加说明。评论颜色可以在畅言平台设置。</p>
-<h2 id="主题修改"><a href="#主题修改" class="headerlink" title="主题修改"></a>主题修改</h2><p>一开始使用MiccallTheme主题，感觉比较库。但是使用过程中间发现无法重本地加载资源。后来自己修改了里面的代码，图片显示正常。但是对于代码块和markdowm显示不够友好。后来发现next主题非常不错，而且很多人在使用，资料也非常详细，功能丰富。主要的设置可以直接在使用文档中查询到，如果有使用疑问，也可以在github上提问。</p>
-<h2 id="博客公式支持"><a href="#博客公式支持" class="headerlink" title="博客公式支持"></a>博客公式支持</h2><p>对于搞算法的同学，经常要编写公式。如果博客能够支持公式编写，那对于写博客是非常方便的一件事情。hexo next主题支持MathJax，具体可以查看主题如何开启。公式编写可参考一下链接<a href="https://www.mathjax.org/#features" target="_blank" rel="external">https://www.mathjax.org/#features</a>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">单行：f(x)=a+b</div><div class="line">代码：单行：$f(x)=a+b$</div><div class="line"></div><div class="line">多行采用两个$$符号：</div><div class="line">f(x)=a+b</div><div class="line">代码：</div><div class="line">多行采用两个$$符号：</div><div class="line">$$f(x)=a+b$$</div></pre></td></tr></table></figure></p>
-<p>公式编写可以在此处编写<a href="http://latex.codecogs.com/" target="_blank" rel="external">http://latex.codecogs.com/</a>,编写方式类似word中的mathtype。</p>
-<h2 id="博客图片添加"><a href="#博客图片添加" class="headerlink" title="博客图片添加"></a>博客图片添加</h2><p>博客图片添加，可以参考这篇博客<a href="http://yangfch3.com/2016/05/08/hexo-experiences/" target="_blank" rel="external">使用 Hexo 与 NexT 搭建博客的避坑总结</a>,插入图片不能采用之前markdown的方式插入，需要使用hexo next主题提供的标签。配置路径的时候需要注意更目录，上面的博客中有提及。</p>
-<h2 id="对博客未来的打算"><a href="#对博客未来的打算" class="headerlink" title="对博客未来的打算"></a>对博客未来的打算</h2><p>既然花了钱又投入了精力搞了一个各人博客，希望自己能够坚持下来。今后主要的学习方向是实时计算和算法（自然语言处理）。学习过程我会沉淀在本博客。希望自己能够以此为动力，驱动自己深入学习一些前沿技术，并锻炼自己总结分享的能力。与此同时也希望自己以后写出来的东西能够帮助到其他人。  </p>
-<h1 id="hexo-常见错误"><a href="#hexo-常见错误" class="headerlink" title="hexo 常见错误"></a>hexo 常见错误</h1><p>1、 TypeError: Cannot read property ‘code’ of undefined ： 配置文件格式不对（yml、json）</p>
-<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
-<li><a href="http://www.jianshu.com/p/fd878edb95e7" target="_blank" rel="external">MAC 上 github + hexo 搭建博客教程</a>  </li>
-<li><a href="http://ibruce.info/2013/11/22/hexo-your-blog" target="_blank" rel="external">hexo你的博客</a>  </li>
-<li><a href="https://www.zhihu.com/question/31377141" target="_blank" rel="external">github域名配置和解析</a>  </li>
-<li><a href="http://www.jianshu.com/p/cea41e5c9b2a" target="_blank" rel="external">hexo搭建的Github博客绑定域名</a>  </li>
-<li><a href="http://eleveneat.com/2015/04/24/Hexo-a-blog/" target="_blank" rel="external">利用GitHub-Pages来Hexo一个独立博客</a>  </li>
-<li><a href="https://nodejs.org/en/" target="_blank" rel="external">node js</a>  </li>
-<li><a href="https://github.com/bubkoo/hexo-toc" target="_blank" rel="external">markdown toc</a>  </li>
-<li><a href="http://www.jianshu.com/p/c2ba9533088a" target="_blank" rel="external">图片加载插件</a>  </li>
-<li><a href="https://commentit.io/getting-started" target="_blank" rel="external">添加评论</a>  </li>
-<li><a href="http://www.wuxubj.cn/2016/08/Hexo-nexT-build-personal-blog/" target="_blank" rel="external">Hexo+nexT主题搭建个人博客</a></li>
-<li><a href="https://blog.yizhilee.com/post/blog-config/" target="_blank" rel="external">Hexo 主题基础配置</a></li>
-<li><a href="https://notes.wanghao.work/2015-10-21-%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html#%E9%85%8D%E7%BD%AELeanCloud" target="_blank" rel="external">为NexT主题添加文章阅读量统计功能</a></li>
-<li><a href="http://2wildkids.com/2016/10/06/%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86Hexo%E5%92%8CMathJax%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/" target="_blank" rel="external">如何处理Hexo和MathJax的兼容问题</a></li>
-</ol>
-<p>有任何关于Hexo的问题，欢迎来 <a href="https://coderq.com/c/ji-zhu/hexo" target="_blank" rel="external">Hexo 中文社区</a> 咨询。</p>
+        <h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计呢？接下来介绍的布隆过滤器（Bloom Filter）就可以满足当前的使用场景（注释：基数计数法同样能满足pv、uv的统计）。</p>
+<h1 id="布隆过滤器简介"><a href="#布隆过滤器简介" class="headerlink" title="布隆过滤器简介"></a>布隆过滤器简介</h1><p>布隆过滤器（Bloom Filter）是1970年由布隆提出的一种空间空间效率很高的随机数据结构，它利用位数组很简洁地表示一个集合，并判断一个元素是否属于这个集合。使用布隆过滤器，存在第一类出错（False positive ），但是不会存在第二类错误（False negative），因此，布隆过滤器拥有100%的召回率。也就是说，布隆过滤器能够准确判断一个元素不在集合内，但只能判断一个元素可能在集合内。因此，Bloom Filter不适合“零错误”的应用场合。在能够容忍低错误的应用场合下，Bloom Filter通过极少的错误换取了存储空间的极大节省。我们可以向布隆过滤器里添加元素，但是不能从中移除元素（普通布隆过滤器，增强的布隆过滤器是可以移除元素的）。随着布隆过滤器中元素的增加，犯第一类错误的可能性也随之增大。</p>
+<h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>一个空的布隆过滤器有长度为M比特的bit数组构成，且所有位都初始化0。一个元素通过K个不同的hash函数随机散列到bit数组的K个位置上，K必须远小于M。K和M的大小由错误率（false positive rate）决定。</p>
+<img src="/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
+<p>Bloom Filter 的一个例子集合{ x, y, z }。带有颜色的箭头表示元素经过 $k（k＝3）$ hash函数的到在M（bit数组）中的位置。元素W不在S集合中，因为元素W经过k个hash函数得到在M（bit数组）的k个位置中存在值为0的位置。<br>向集合S中添加元素x：x经过k个散列函数后，在M中得到k个位置，然后，将这k个位置的值设置为1。<br>判断x元素是否在集合S中：x经过k个散列函数后，的到k个位置的值，如果这k个值中间存在为0的，说明元素x不在集合中——元素x曾经插入到过集合S，则M中的k个位置会全部置为1；如果M中的k个位置全为1，则有两种情形。情形一：这个元素在这个集合中；情形二：曾经有元素插入的时候将这k个位置的值置为1了（第一类错误产生的原因False Positive）。简单的布隆过滤器无法区分这两种情况，在增强版中解决了这个问题。<br>设计k个相互独立的hash函数可能工作量比较大，但是一个好的hash函数是降低误判率的关键。一个良好的hash函数应该有宽输出，他们之间的冲突应尽量低，这样k个hash函数能静可能的将值hash的更多的位置。hash函数的设计是我们可以将k个不同的值$\left (0, 1, \cdots , k - 1  \right )$ 作为参数传入，或者将它们加入主键中。对于大的M或者k，hash函数之间的独立性对误判率影响非常大（(Dillinger &amp; Manolios (2004a), Kirsch &amp; Mitzenmacher (2006))）,Dillinger在k个散列函数中，多次使用同一个函数散列，分析对误判率的影响。<br>对于简单布隆过滤器来说，从集合S中移除元素x是不可能的，且false negatives不允许。元素散列到k个位置，尽管可以 将这k个位置的值置为0来移除这个元素，但是这同事也移除了那些散落后，有值落在这k位中的元素。因此，没有一种方法可以判断移除这个元素后是否影响其它已经加入集合中的元素，将k个位置置为0会引入二类误差（false negative）。</p>
+<h2 id="时间复杂度和空间复杂度"><a href="#时间复杂度和空间复杂度" class="headerlink" title="时间复杂度和空间复杂度"></a>时间复杂度和空间复杂度</h2><p>在false positives的情况下，布隆过滤器相比其它的集合（平衡二叉树、树、hash表、数组、链表）只需要少量的存储空间。布隆过滤器的添加和检查元素是否在集合内的复杂度为O(K)。Hash表的平均复杂度比布隆过滤器更低。Bloom 过滤器在误差最优的情况下，平均每个元素大概是1.44bit。</p>
+<h2 id="错误率估计"><a href="#错误率估计" class="headerlink" title="错误率估计"></a>错误率估计</h2><p>布隆过滤器判断一个元素是否属于它表示的集合时会存在已定的错误率（false positive rate），接下来就估计错误率的大小。在估计误差前，我们假设$kn &lt; m$(k哈希函数的个数，n集合中元素的个数，m bit数组的长度）且哈希函数之间时相互独立的，哈希函数散列的bit数组M中的位置时完全随机的。<br>一个长度为m的bit数组，元素在插入时经过一次哈希散列后bit数组的某个位置的值没有被置为1的概率为<br>$$1-\frac{1}{m}$$<br>经过k个哈希函数散列后，还未被置为1的概率为<br>$$(1-\frac{1}{m})^{k}$$<br> 如果插入n个元素后，该位置还未被置为1的概率为<br> $$(1-\frac{1}{m})^{kn}$$<br> 所以被置为1的概率为<br>$$1-(1-\frac{1}{m})^{kn}$$<br>现在判断一个元素是否在结合中，经过k个函数散列到k个bit数组的不同位置。所有这些位置的值为1的概率——误判率。<br>$$(1-\left [ 1-\frac{1}{m} \right ]^{kn})^{k} \approx (1-e^{\frac{-kn}{m}})^{k}$$<br>这里使用了这个极限<br>$$\lim_{x \to \infty }\left ( 1 - \frac{1}{x} \right )^{-x}=e$$<br>这种计算方法不严格，因为前面假设哈希函数和散列后值的分布是相互独立的。但是，这个假设随着m和n的增大误判率更接近真实的误判率。<br>Mitzenmacher and Upfal 证明无假设情况下的误判率的期望值相同。</p>
+<h2 id="最优的哈希函数个数"><a href="#最优的哈希函数个数" class="headerlink" title="最优的哈希函数个数"></a>最优的哈希函数个数</h2><p>既然布隆过滤器将集合映射到位数组中，那么选多少个hash函数才是错误率最低的情况。这里有两个互斥的理由：如果哈希函数的个数多，那么在对一个不属于集合的元素进行查询时得到0的概率就大；但另一方面，如果哈希函数的个数少，那么位数组中的0就多。为了得到最优的哈希函数个数，我们需要根据上一小节中的错误率公式进行计算。<br>$$p = \left( 1 - e^{\frac{kn}{m}}\right)^{k}$$<br>两边取自然对数<br>$$p = exp \left ( kln \left ( 1 - e^{-\frac{kn}{m}} \right ) \right )$$<br>令 $$p =kln \left ( 1 - e^{\frac{kn}{m}}\right )$$<br>只要g取最小值，p就能取到最小值。由于p＝e^(-nk/m),我们可以将g改写为<br>$$g=-\frac{m}{n}ln \left (p \right ) ln \left (1 - p \right )$$<br>根据对称法则（对函数进行求导）可以得到当$p＝\frac{1}{2}$时，也就是$k＝ln2*\left (\frac{m}{n} \right )$时，g取得最小值，在这种情况下，最小的错误率$p=\left (\frac{1}{2}  \right )^{k}\approx 0.6185^{\frac{m}{n}}$。p＝1/2对应着位数组中0和1各半。换句话说，想保持错误率低，最好让位数组有一半还空着。</p>
+<h2 id="位数组的大小"><a href="#位数组的大小" class="headerlink" title="位数组的大小"></a>位数组的大小</h2><p>在给定n（集合中元素的个数）和错误率（最优函数个数k的的错误率）的情况下，位数组M的大小计算，在最优k的情况下<br>$$p=\left ( 1-e^{-\left ( \frac{m}{n}ln2 \right )\frac{n}{m}} \right )^{\frac{m}{n}ln2}$$<br>化简为<br>$$lnp = -\frac{m}{n}\left ( ln2 \right )^{2}$$<br>得到<br>$$m = -\frac{nlnp}{\left ( ln2 \right )^{2}}$$<br>这意味着在错误率为p的情况下，布隆过滤器的长度为m才能容纳n个元素（以上计算基于n,m-&gt;∞）。</p>
+<h2 id="布隆过滤器中元素个数的估算"><a href="#布隆过滤器中元素个数的估算" class="headerlink" title="布隆过滤器中元素个数的估算"></a>布隆过滤器中元素个数的估算</h2><p>Swamidass &amp; Baldi (2007)给出了布隆过滤器元素个数估算的方法（详细证明方式参考论文）<br>$$n^{\ast  } = - \frac{m ln \left [ 1-\frac{X}{m} \right ]}{k}$$<br>其中，n*表示布隆过滤元素个数的估算值，m表示布隆过滤器的大小，k表示哈希函数的个数，X表示布隆过滤器位值位1的个数。</p>
+<h2 id="布隆过滤器的并和交"><a href="#布隆过滤器的并和交" class="headerlink" title="布隆过滤器的并和交"></a>布隆过滤器的并和交</h2><p>布隆过滤器可以用来估算两个集合之间的并合交。一下给出两个集合之间并的计算方式：<br>$$n(A)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( A \right )}{m} \right ]}{k}$$<br>$$n(B)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( B \right )}{m} \right ]}{k}$$<br>A和B之间的并集的个数为：<br>$$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = -\frac{m ln\left [ 1 - \frac{n\left ( A \bigcup B \right )}{m} \right ]}{k}$$<br>所以A<em>与B</em>之间的交集的个数为：<br>$$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = n\left ( A^{\ast } \right ) + n\left ( B^{\ast } \right ) + n\left ( A^{\ast } \bigcup A^{\ast }  \right )$$</p>
+<h2 id="布隆过滤的特性"><a href="#布隆过滤的特性" class="headerlink" title="布隆过滤的特性"></a>布隆过滤的特性</h2><p>布隆过滤器能够容纳任意多的元素（误判率会增加），总是能向布隆过滤器中添加元素，不会报错（Out Memory等）;<br>布隆过滤器可以很方便的通过计算机的or \and操作计算两个集合元素之间的交集（intersection）和并集（union）,但是同样影响布隆过滤的准确性。</p>
+<h2 id="使用例子"><a href="#使用例子" class="headerlink" title="使用例子"></a>使用例子</h2><p>Google bigtable、apache hbase 和 apache cassandra使用bloom过滤器判断是否存在该行（rows）或（colums），以减少对磁盘的访问，提高数据库的访问性能；<br>比特币使用布隆过滤判断钱包是否同步OK。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在计算机这个领域里，我们常常碰到时间换空间\或空间换时间的情况，为了达到某一方面的性能，牺牲另外一方面。Bloom Filter在时间和空间着两者之间引入了另外一个概念——错误率。也就是前文提到的布隆过滤不能准确判断一个元素是否在集合内（类似的设计还有基数统计法）。引入错误率后，极大的节省了存储空间。<br>自从Burton Bloom在70年代提出Bloom Filter之后，Bloom Filter就被广泛用于拼写检查和数据库系统中。近一二十年，伴随着网络的普及和发展，Bloom Filter在网络领域获得了新生，各种Bloom Filter变种和新的应用不断出现。可以预见，随着网络应用的不断深入，新的变种和应用将会继续出现，Bloom Filter必将获得更大的发展。</p>
 
       
     </div>
@@ -497,11 +467,13 @@
       
         <div class="post-tags">
           
-            <a href="/tags/blog/" rel="tag"># blog</a>
+            <a href="/tags/概率统计原理/" rel="tag"># 概率统计原理</a>
           
-            <a href="/tags/hexo/" rel="tag"># hexo</a>
+            <a href="/tags/实时计算/" rel="tag"># 实时计算</a>
           
-            <a href="/tags/建站/" rel="tag"># 建站</a>
+            <a href="/tags/Bloom-filter/" rel="tag"># Bloom filter</a>
+          
+            <a href="/tags/布隆过滤器/" rel="tag"># 布隆过滤器</a>
           
         </div>
       
@@ -514,14 +486,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2015/06/18/自由博客之路/" rel="next" title="自由博客之路">
+                <i class="fa fa-chevron-left"></i> 自由博客之路
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/05/26/Bloom filter(布隆过滤器)概念与原理/" rel="prev" title="Bloom filter(布隆过滤器)概念与原理">
-                Bloom filter(布隆过滤器)概念与原理 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/06/28/数据系统架构之Lambda architecture/" rel="prev" title="数据系统架构之Lambda architecture">
+                数据系统架构之Lambda architecture <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -670,7 +646,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要建立自己的博客"><span class="nav-number">1.</span> <span class="nav-text">为什么要建立自己的博客</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo你的博客"><span class="nav-number">2.</span> <span class="nav-text">Hexo你的博客</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#留言添加"><span class="nav-number">3.</span> <span class="nav-text">留言添加</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主题修改"><span class="nav-number">4.</span> <span class="nav-text">主题修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博客公式支持"><span class="nav-number">5.</span> <span class="nav-text">博客公式支持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博客图片添加"><span class="nav-number">6.</span> <span class="nav-text">博客图片添加</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对博客未来的打算"><span class="nav-number">7.</span> <span class="nav-text">对博客未来的打算</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#hexo-常见错误"><span class="nav-number"></span> <span class="nav-text">hexo 常见错误</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参考链接"><span class="nav-number">1.</span> <span class="nav-text">参考链接</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#布隆过滤器简介"><span class="nav-number">2.</span> <span class="nav-text">布隆过滤器简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#算法描述"><span class="nav-number">2.1.</span> <span class="nav-text">算法描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#时间复杂度和空间复杂度"><span class="nav-number">2.2.</span> <span class="nav-text">时间复杂度和空间复杂度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误率估计"><span class="nav-number">2.3.</span> <span class="nav-text">错误率估计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最优的哈希函数个数"><span class="nav-number">2.4.</span> <span class="nav-text">最优的哈希函数个数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#位数组的大小"><span class="nav-number">2.5.</span> <span class="nav-text">位数组的大小</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#布隆过滤器中元素个数的估算"><span class="nav-number">2.6.</span> <span class="nav-text">布隆过滤器中元素个数的估算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#布隆过滤器的并和交"><span class="nav-number">2.7.</span> <span class="nav-text">布隆过滤器的并和交</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#布隆过滤的特性"><span class="nav-number">2.8.</span> <span class="nav-text">布隆过滤的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用例子"><span class="nav-number">2.9.</span> <span class="nav-text">使用例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">2.10.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
             
 
           </div>

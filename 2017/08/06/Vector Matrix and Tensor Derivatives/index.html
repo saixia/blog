@@ -98,7 +98,7 @@
 <meta property="og:image" content="http://saixia.me/images/Vector%20Matrix%20and%20Tensor%20Derivatives/graph1.jpg">
 <meta property="og:image" content="http://saixia.me/images/Vector%20Matrix%20and%20Tensor%20Derivatives/graph2.jpg">
 <meta property="og:image" content="http://saixia.me/images/Vector%20Matrix%20and%20Tensor%20Derivatives/graph3.jpg">
-<meta property="og:updated_time" content="2017-08-24T23:43:08.000Z">
+<meta property="og:updated_time" content="2017-08-26T06:34:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Vector Matrix and Tensor Derivatives">
 <meta name="twitter:description" content="简介目的: 本节主要讲述反向传播和一种采用链式法则计算梯度的方法。理解反向传播的处理过程对于理解、开发、设计、调试神经网络至关重要。 问题描述: 本节中主要解决已知函数 $f(x)$，求函数在 $x$ 的梯度，其中 $x$ 为输入向量。 目的： 回想一下神经网络这个特定问题中,其中 $f$ 相当于损失函数 $L(x)$ ,输入参数 $x$ 对应训练数据和神经网络中的权重。例如，损失函数是SVM损失">
@@ -423,7 +423,7 @@
       
         <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><strong>目的:</strong> 本节主要讲述反向传播和一种采用链式法则计算梯度的方法。理解反向传播的处理过程对于理解、开发、设计、调试神经网络至关重要。</p>
 <p><strong>问题描述:</strong> 本节中主要解决已知函数 $f(x)$，求函数在 $x$ 的梯度，其中 $x$ 为输入向量。</p>
-<p><strong>目的：</strong> 回想一下神经网络这个特定问题中,其中 $f$ 相当于损失函数 $L(x)$ ,输入参数 $x$ 对应训练数据和神经网络中的权重。例如，损失函数是SVM损失函数，输入为训练数据 $(x<em>{i},y</em>{j})$ ,$i=1 \cdots N$ 和网络的权重 $W$ 和偏置 $b$ 。请注意通常在机器学习中我们认为训练数据是给定，权重是一个可控的变量。因此，我们采用反向传播可以非常容易求得输入$x$的梯度。在训练过程中，只需要计算参数 $W$, $b$ 的梯度，所以我们可以采用它来执行参数的迭代。然而，在后续课程中$x_i$的梯度在某些情况下同样有用，例如：用于可视化和解释神经网络的执行过程。</p>
+<p><strong>目的：</strong> 回想一下神经网络这个特定问题中,其中 $f$ 相当于损失函数 $L(x)$ ,输入参数 $x$ 对应训练数据和神经网络中的权重。例如，损失函数是SVM损失函数，输入为训练数据 $\left (x_{i},y_{j} \right )$ , $i=1 \cdots N$ 和网络的权重 $W$ 和偏置 $b$ 。请注意通常在机器学习中我们认为训练数据是给定，权重是一个可控的变量。因此，我们采用反向传播可以非常容易求得输入$x$的梯度。在训练过程中，只需要计算参数 $W$, $b$ 的梯度，所以我们可以采用它来执行参数的迭代。然而，在后续课程中$x_i$的梯度在某些情况下同样有用，例如：用于可视化和解释神经网络的执行过程。</p>
 <p>如果您在参加本课程前已经了解了链式法则，我们乃鼓励您阅读本文。因为，本文以图解的形式讲解了反向传播的整个过程，对于理解反向传播能有一个直观的理解。</p>
 <h1 id="梯度"><a href="#梯度" class="headerlink" title="梯度"></a>梯度</h1><p>熟悉简单实例后，我们就能处理复杂函数求梯度。以两个变量相乘为例$f(x,y)=xy$，$x$， $y$ 的偏导分表为：</p>
 <p>$$f(x,y)=xy\rightarrow\frac{\partial f}{\partial x}=y\qquad\frac{\partial f}{\partial y}=x$$</p>
@@ -633,7 +633,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -655,7 +655,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
