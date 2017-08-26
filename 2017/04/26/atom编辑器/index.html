@@ -1,0 +1,1122 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="atom,sublime," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="atom编辑器总体介绍此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ https://atom.io/ ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。 那它有哪些吸引人的">
+<meta name="keywords" content="atom,sublime">
+<meta property="og:type" content="article">
+<meta property="og:title" content="atom编辑器">
+<meta property="og:url" content="http://saixia.me/2017/04/26/atom编辑器/index.html">
+<meta property="og:site_name" content="Seth&#39;s blog">
+<meta property="og:description" content="atom编辑器总体介绍此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ https://atom.io/ ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。 那它有哪些吸引人的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://saixia.me/images/atom编辑器/graph1.jpg">
+<meta property="og:image" content="http://saixia.me/images/atom编辑器/graph2.jpg">
+<meta property="og:image" content="http://saixia.me/images/atom编辑器/graph3.jpg">
+<meta property="og:image" content="http://saixia.me/images/atom编辑器/graph4.jpg">
+<meta property="og:updated_time" content="2017-08-26T02:22:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="atom编辑器">
+<meta name="twitter:description" content="atom编辑器总体介绍此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ https://atom.io/ ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。 那它有哪些吸引人的">
+<meta name="twitter:image" content="http://saixia.me/images/atom编辑器/graph1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":"ture"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://saixia.me/2017/04/26/atom编辑器/"/>
+
+
+
+
+
+  <title> atom编辑器 | Seth's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="//s95.cnzz.com/z_stat.php?id=1262332391&web_id=1262332391" language="JavaScript"></script>
+  </div>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Seth's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Seth</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://saixia.me/2017/04/26/atom编辑器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="saixia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Seth's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                atom编辑器
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-26T20:03:36+08:00">
+                2017-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/other/" itemprop="url" rel="index">
+                    <span itemprop="name">other</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2017/04/26/atom编辑器/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2017/04/26/atom编辑器/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2017/04/26/atom编辑器/" class="leancloud_visitors" data-flag-title="atom编辑器">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="atom编辑器"><a href="#atom编辑器" class="headerlink" title="atom编辑器"></a>atom编辑器</h1><h2 id="总体介绍"><a href="#总体介绍" class="headerlink" title="总体介绍"></a>总体介绍</h2><p>此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ <a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。</p>
+<p>那它有哪些吸引人的特性，接下来我就介绍一下Atom的总体特性。Atom编辑器支持Windows、Mac、Linux三大桌面平台，完全免费，并且已经在GitHub上开放全部的源代码。Atom采用类似Sublime的包管理功能，支持插件扩展，可配置性非常高，可以根据自身的使用特点，按照不同的插件。Atom有着各种流行编辑器都有的特性，功能上非常丰富，支持各种编程语言的代码高亮（HTML / CSS / Javascript / PHP / Python / C / C++ / Objective C / Java / JSON / Perl / CoffeeScript / Go / Sass / YAML / Markdown 等等）和代码补全功能，极大的提高了编程效率。具有项目管理、git代码管理等特性。采用文档管理的形式管理，这就不会出现笔记越多，编辑器就运行越慢。</p>
+<p><strong> 注 </strong> 测试过100M左右的文件打开和编辑 ，反应速度确实比sublime要慢很多。大文件操作建议sublime操作，sublime编辑丢失的可能比较小，atom卡死后编辑会丢失。个人比较喜欢的是atom的插件和界面风格的简约，一般也不会编辑几十M的文件。</p>
+<p>先上一个页面直观感受一下：<br><img src="/images/atom编辑器/graph1.jpg" class="full-image"></p>
+<h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><p>Atom编辑器连接地址：<a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> 常见的使用功能和其他软件类似，本文就不做具体介绍。<br>本文主要介绍一下几点：</p>
+<ol>
+<li>插件添加 Atom -&gt; Preferences（Settings） -&gt; install 搜索需要按照的插件，找到后直接按照就ok。在Settings里面可以对已安装的插件进行管理。点击对应的插件，可以查看插件的功能说明和使用说明，其中包括常用的快捷键。对于之前安装好的插件，可以在package里面查找，点击插件同样可以查看使用说明。（如果不能安装，可以git上下载包放入~/.atom/packages目录，志辰提供），不适用的插件可以停了，加快atom的运行速度。</li>
+</ol>
+<img src="/images/atom编辑器/graph2.jpg" class="full-image">
+<ol>
+<li>快捷键的修改 Atom -&gt; Preferences（Settings） -&gt; KeyBindings 先找到需要修改的快捷键或者插件，然后点击快捷键前的复制按钮，最后将复制的代码粘贴到（your keymap file）。对于快捷键不要重复，重复可能导致快捷键无法使用。</li>
+</ol>
+<img src="/images/atom编辑器/graph3.jpg" class="full-image">
+<h2 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h2><h3 id="markdown-preview"><a href="#markdown-preview" class="headerlink" title="markdown-preview"></a>markdown-preview</h3><p>MarkDown文本预览器，有了这款插件可以把atom变成写markdown的神器。</p>
+<h3 id="markdown-scroll-sync"><a href="#markdown-scroll-sync" class="headerlink" title="markdown-scroll-sync"></a>markdown-scroll-sync</h3><p>markdown-scroll-sync将预览和编辑窗口同步滑动。</p>
+<h3 id="file-type-icons"><a href="#file-type-icons" class="headerlink" title="file-type-icons"></a>file-type-icons</h3><p>为各种不同的文件类型显示一个漂亮的ICON</p>
+<h3 id="Sublime-Style-Column-Selection"><a href="#Sublime-Style-Column-Selection" class="headerlink" title="Sublime-Style-Column-Selection"></a>Sublime-Style-Column-Selection</h3><p>Sublime的列编辑模式，atom默认对列编辑模式支持不够友好，安装这个插件可以获得很好的列编辑体验。</p>
+<h3 id="project-manager"><a href="#project-manager" class="headerlink" title="project-manager"></a>project-manager</h3><p>Atom默认关闭不保持当前编辑状态，下次需要自己打开对于的文件，project-manager可以帮助用户保持当前的工作窗口状态。</p>
+<h3 id="markdown-image-paste"><a href="#markdown-image-paste" class="headerlink" title="markdown-image-paste"></a>markdown-image-paste</h3><p>图片、截屏粘贴。默认快捷键ctrl-v；</p>
+<h3 id="markdown-pdf"><a href="#markdown-pdf" class="headerlink" title="markdown-pdf"></a>markdown-pdf</h3><p>支持查看pdf文件</p>
+<h3 id="markdown-table-editor"><a href="#markdown-table-editor" class="headerlink" title="markdown-table-editor"></a>markdown-table-editor</h3><p>一直对Markdown的table语法很无爱，直到遇到了markdown-table-editor，这操作效率简直炸了！文字已经不能表达我的激动之情了，直接看图吧。编辑完以后自动对齐。</p>
+<img src="/images/atom编辑器/graph4.jpg" class="full-image">
+<p>Atom有许多各种各样的插件，用户根据自己的需求，安装对应的插件。</p>
+<p>最近因为使用atom，又研究了一下sublime的一些插件，发现sublime有很多功能未发现。atom相对是使用上还是比较卡，建议采用sublime。sublime的使用方法和atom类似，可以通过安装插件和设置增强sublime的功能。</p>
+<p>下面添加一下sublime的常用插件：</p>
+<ul>
+<li>SideBar Enhancements　　这个插件改进了侧边栏，增加了许多功能</li>
+<li>tableedit   表格编辑器</li>
+<li>MarkdownEditing  markdown编辑</li>
+<li>file icon  文件icon</li>
+<li>Bracket Highlighter：匹配括号</li>
+<li>Alignment : 等号对齐</li>
+<li>image2tage : 图片标签</li>
+<li>omnimarkuppreviewer : markdown实时预览</li>
+<li>Boxy Theme : 主题</li>
+<li>side bar : 文件操作插件</li>
+</ul>
+<p>sublime 常用命令mac：</p>
+<ul>
+<li>（command + shift + p）进入命令模式，可以按照插件，删除插件或者运行插件的命令；</li>
+<li>（command + p） 查找文件；</li>
+</ul>
+<p>附上sublime的设置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;color_scheme&quot;: &quot;Packages/Boxy Theme/schemes/Boxy Ocean.tmTheme&quot;,</div><div class="line">    &quot;draw_white_space&quot;: &quot;all&quot;,</div><div class="line">    &quot;file_exclude_patterns&quot;:</div><div class="line">    [</div><div class="line">        &quot;*.pyc&quot;,</div><div class="line">        &quot;*.pyo&quot;,</div><div class="line">        &quot;*.exe&quot;,</div><div class="line">        &quot;*.dll&quot;,</div><div class="line">        &quot;*.obj&quot;,</div><div class="line">        &quot;*.o&quot;,</div><div class="line">        &quot;*.a&quot;,</div><div class="line">        &quot;*.lib&quot;,</div><div class="line">        &quot;*.so&quot;,</div><div class="line">        &quot;*.dylib&quot;,</div><div class="line">        &quot;*.ncb&quot;,</div><div class="line">        &quot;*.sdf&quot;,</div><div class="line">        &quot;*.suo&quot;,</div><div class="line">        &quot;*.pdb&quot;,</div><div class="line">        &quot;*.idb&quot;,</div><div class="line">        &quot;.DS_Store&quot;,</div><div class="line">        &quot;*.class&quot;,</div><div class="line">        &quot;*.psd&quot;,</div><div class="line">        &quot;*.db&quot;,</div><div class="line">        &quot;*.sublime-workspace&quot;,</div><div class="line">        &quot;*.doc*&quot;,</div><div class="line">        &quot;*.xls*&quot;</div><div class="line">    ],</div><div class="line">    &quot;folder_exclude_patterns&quot;:</div><div class="line">    [</div><div class="line">        &quot;.svn&quot;,</div><div class="line">        &quot;.repo&quot;,</div><div class="line">        &quot;.git&quot;,</div><div class="line">        &quot;.hg&quot;,</div><div class="line">        &quot;CVS&quot;</div><div class="line">    ],</div><div class="line">    &quot;font_size&quot;: 15,</div><div class="line">    &quot;ignored_packages&quot;:</div><div class="line">    [</div><div class="line">        &quot;Vintage&quot;</div><div class="line">    ],</div><div class="line">    &quot;theme&quot;: &quot;Boxy Ocean.sublime-theme&quot;,</div><div class="line">    &quot;translate_tabs_to_space&quot;: true,</div><div class="line">    &quot;wrap_width&quot;: 80</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+<div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/mainseth.png" alt="saixia wechat" style="width: 200px; max-width: 100%;"/>
+    <div>扫一扫，用手机访问本站</div>
+</div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/atom/" rel="tag"># atom</a>
+          
+            <a href="/tags/sublime/" rel="tag"># sublime</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/13/Beringei时序数据库/" rel="next" title="Beringei时序数据库">
+                <i class="fa fa-chevron-left"></i> Beringei时序数据库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/01/Flink Metrics/" rel="prev" title="Flink Metrics">
+                Flink Metrics <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="SOHUCS"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="saixia" />
+          <p class="site-author-name" itemprop="name">saixia</p>
+           
+              <p class="site-description motion-element" itemprop="description">Whatever is worth doing is worth doing well I'll think of you every step of the way</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/saixia" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#atom编辑器"><span class="nav-number">1.</span> <span class="nav-text">atom编辑器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#总体介绍"><span class="nav-number">1.1.</span> <span class="nav-text">总体介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用说明"><span class="nav-number">1.2.</span> <span class="nav-text">使用说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用插件"><span class="nav-number">1.3.</span> <span class="nav-text">常用插件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#markdown-preview"><span class="nav-number">1.3.1.</span> <span class="nav-text">markdown-preview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#markdown-scroll-sync"><span class="nav-number">1.3.2.</span> <span class="nav-text">markdown-scroll-sync</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#file-type-icons"><span class="nav-number">1.3.3.</span> <span class="nav-text">file-type-icons</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sublime-Style-Column-Selection"><span class="nav-number">1.3.4.</span> <span class="nav-text">Sublime-Style-Column-Selection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#project-manager"><span class="nav-number">1.3.5.</span> <span class="nav-text">project-manager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#markdown-image-paste"><span class="nav-number">1.3.6.</span> <span class="nav-text">markdown-image-paste</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#markdown-pdf"><span class="nav-number">1.3.7.</span> <span class="nav-text">markdown-pdf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#markdown-table-editor"><span class="nav-number">1.3.8.</span> <span class="nav-text">markdown-table-editor</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">saixia</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt4Mszyk';
+      var conf = 'prod_84012c6583611e5d040e9308852b5267';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("LjhheWaehewK7q4K5t2VQv6W-gzGzoHsz", "xywKJ7E9yXzxFus7WnVTYStW");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>
