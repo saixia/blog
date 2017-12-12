@@ -1,0 +1,856 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+    
+    <entry>
+      <title><![CDATA[流数据处理介绍]]></title>
+      <url>/2017/12/13/%E6%B5%81%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%BB%8B%E7%BB%8D/</url>
+      <content type="html"><![CDATA[<p>Apache Flink是一个分布式流计算引擎，开发者可以在其上快速实现流式计算。Apache Flink起源2009年在德国柏林理工大学成立的‘Stratosphere’项目。2014年4月成为Apache软件基金的一个孵化项目，8个月之后就成为Apache软件基金的顶级项目。如今有超过250个体向Flink贡献代码。流计算技术快速的被初创公司、企业所采纳，因为它在软件开发、系统架构、商业分析更有效果。本文主要分析传统数据处理架构和流梳理数据架构之间的差异，从而凸显出流计算的特性。</p>
+<h2 id="传统数据分析方法"><a href="#传统数据分析方法" class="headerlink" title="传统数据分析方法"></a>传统数据分析方法</h2><p>传统IT设施、业务应用程序运行于不同的操作系统，数据落地于不同的数据库中，当做数据分析的时候无法满足复杂的分析，大表关联查询性能要么不支持、要么性能非常差。</p>
+<p>替代传统数据库的分析方案是传统的数据仓库。数据仓库的操作过程我们叫他为ETL（extract-transform-load），这个过程包含数据有效性检验、数值标准化、编码、模式转化、重复值去除。ETL是一个非常复杂的一个过程，通常需要专业的技能才能完成这个工作。致命的一点是数据仓库中的数据是周期性更新的，为何是致命的一点后面将做详细讲解。以下是ETL的架构图：</p>
+<img src="/images/流数据处理介绍/TraditionalBatchAnalytics2.png" class="full-image" title="图（A）"> 
+<p>这种模式在很长一段时间里，都使用分析型数据库作为数据仓库的载体。最近10年，出现了以MapReduce、HDFS、Hbase为框架的数据处理框架。这种形式存在如下缺点。首先，维持系统的平稳运行就是一个较大的挑战，其中需要配置集群、开发ETL任务、任务调度管理，每个步骤都存在较大的挑战。其次，这种框架在数据处理上存在较大的延迟。数据从业务系统产生到分析出结果的延迟一般需要几个小时，有的甚至超过一天。当然，一个批处理平台只能在事件发生后才能处理这些数据，不能在事件发生的时候处理。</p>
+<h2 id="数据分析演化"><a href="#数据分析演化" class="headerlink" title="数据分析演化"></a>数据分析演化</h2><p>以前，数据分析在几个小时或者一天的延迟内是可以接受的。然而，现在的系统和业务对数据的实效性要求越来越高。例如：商品推荐系统，系统监控。这些都实时收集这些数据并处理，根据处理结果做相应的应对动作。</p>
+<p>流计算处理就能够满足上面的要求，数据产生出来后在几秒内就处理完得出分析结果。根据传统ETL结构图，流计算架构图如下：</p>
+<img src="/images/流数据处理介绍/StreamingAnalytics.png" class="full-image" title="图（B）">
+<p>CDC（change data capture）获取业务系统变化的记录，例如通过采集Binlog日志。常见的消息队列有Kafka，Metaq、TT，其中有保序和不保序的消息队列。流处理统计得出对应的指标，并将结果存在在KV数据库（HBase）上，最终通过dashboard展示结果或者推送个应用系统做出相应的推荐。流处理的第一个优点是延迟小，因为流计算处理不需要数据加载，定时批量处理数据。因为流处理数据摄入和处理在一个框架内处理的，所以流处理系统不需要处理数据摄入、任务调度，相比批处理系统更加稳定。</p>
+<h1 id="流数据分析"><a href="#流数据分析" class="headerlink" title="流数据分析"></a>流数据分析</h1><p>对于延迟非常低的一些应用，批处理无法满足这样的低延迟，流处理能非常的满足这种场景。这些应用如：</p>
+<ul>
+<li>异常检测，例如：检测网络攻击；</li>
+<li>实时推荐，例如：根据用户最近几分钟的行为动作，为用户推荐商品；</li>
+<li>模式识别或复杂事物处理，例如：信用卡诈骗；</li>
+<li>在线ETL，数据产生时连续不断的将数据转移并加载；</li>
+<li>在新兴技术中的应用，如：物联网。</li>
+</ul>
+<p>然而，解决以上场景的能力并不是寻找分布式流处理的唯一动因。它同样为数据应用提供了一种可扩展的数据架构。系统间通过定义好的接口通信，各系统之间相互独立。架构图如下：</p>
+<img src="/images/流数据处理介绍/StreamingBeyondAnalytics.png" class="full-image" title="图（C）">
+<p>图中，有一个web和日志采集服务实时采集数据并将数据写入消息队列中。带状态的流应用处理将数据摄入，处理，最后将结果写入消息队列或者写入数据库中通过可视化工具展示出来。</p>
+<p>这种架构除具有以上优点外，还具备一下优点。通过持久化的消息队列在带状态的应用程序中进行通信具备如下优势：</p>
+<ul>
+<li>多个应用可以读和写一个数据流；这个保障了所有应用消费的数据完全一致、并且顺序也是一致的；</li>
+<li>应用程序可以重复消费这份持久化在消息队列中的数据。当修复bug的时候用于AB测试非常有用；</li>
+<li>有状态流处理程序将状态数据持久化，便于失败的时候恢复；</li>
+<li>这种架构将实现了读写分离。数据采集只能追加，有非常好的写性能。下游读应用也有非常好的读性能；</li>
+<li>最后，这种框架容易扩展，应为消息队列和流处理都是分布式系统；</li>
+</ul>
+<p>上述解决方案，为业务提供了OLTP库类似的解决方案，但又具备上面所列举的特性。 </p>
+<h1 id="开源流处理演进"><a href="#开源流处理演进" class="headerlink" title="开源流处理演进"></a>开源流处理演进</h1><p>数据流处理不是一项新技术。第一个研究原型和商业化产品可以回溯到20世纪90年代。然而，最近的流处理技术主要是基于开源软件发展起来。今天，分布式开源流处理引擎为许多不同领域的企业提供关键业务应用，如：在线零售，社交媒体，电信，游戏，和银行。开源软件是这一趋势的主要推动力，主要是由于以下两个原因。其一，开源软件每个人都可以使用和改进它。其二，由于开源社区的努力，可扩展的流处理技术正在迅速成熟和发展。仅Apache软件基金就有10多个项目于流处理相关。新的流处理项目还在源源不断的进入开源社区，且以新的特性和能力挑战当前的新技术。这些新系统的许多特性正被其他流处理框架采纳和吸收。此外，开软软件的使用者可以请求或贡献缺少的新功能，以支持这些场景。就这样开源社区不断提高项目的处理能力，进一步推动流计算处理。我们将简要回顾一下流处理的发展历程并将展望未来。</p>
+<p>第一个获得大量使用的开源分布式流计算处理引擎专注于毫米级的时间处理，并保证系统发生故障时事件不丢失。这些系统提供底层API并且不提供对流式应用的准确一致的结果支持，应为结果取决于事件抵达的时间和先后顺序。而且，就算事件不会在失败的时候丢失，同一个事件也会存在重复。</p>
+<p>与提供准确和高延迟的批处理相反，第一个开源流处理器倾向于用准确性换地延迟。这样的数据处理系统能够提供低延迟和存在一定误差的结果。这种系统结构叫做Lambda架构，如下图：</p>
+<img src="/images/流数据处理介绍/LambdaArchitecture.png" class="full-image" title="图（D）">
+<p>Lambda架构利用地延迟的流计算处理支持Speed Layer增强传统批出来系统。数据抵达Lambda架构后由流处理器读取数据，并将数据写入批处理存储上，如：HDFS。流处理器几乎实时的计算出估计结果，并将结果写入Speed Table中。批处理器周期性的将写在批量存储器上的数据处理完。准确的结果将写入Batch Table并删除Speed Table上的估计结果。服务层通过合并来源于Speed Table的估计结果和Batch Table的精确结果为应用程序提供服务。Lambda架构目的时在于改善批处理系统的高延迟。然而，这种方法也存在非常明显的缺点。首先，需要分别实现两套处理系统语义不同的接口。其次，流计算处理器计算的结果是一个估计值，而不是一个准确的结果。再次，Lambda架构难以设置和维护。流处理器、批处理器、速度存储、批存储、数据摄入、批处理任务调度器都需要使用说明手册。</p>
+<p>第二代流处理器，在第一代的基础上改善了准确性，实现了一个事件之消费一次的语义（exactly once）。同时提供的API相比第一代更加高级，在吞吐量和失败恢复上都有较大的改善。但是还是没有解决乱序的问题，计算结果还是受数据的消费顺序影响。</p>
+<p>在第三代流处理器的计算结果不在依赖数据的消费顺序，能够准确计算出结果。另一个改进是吞吐-延迟衡量。这一代流计算处理器使得Lambda架构被淘汰。说了这么多，接下来我们看一个第三代流处理引擎flink。</p>
+<h1 id="初探Flink"><a href="#初探Flink" class="headerlink" title="初探Flink"></a>初探Flink</h1><p>Apache Flink是一个分布式流计算引擎，据有第三代引擎的特性。她在大规模数据处理上提供了准确的、高吞吐、地延迟的处理。以下是Flink的特性，详细的特性请参考Flink官网：<a href="https://flink.apache.org/。" target="_blank" rel="external">https://flink.apache.org/。</a></p>
+<ul>
+<li>Flink提供三种时间语义：事件事件（event-time），摄入事件（ingestion-time），处理事件（Processing-time）；</li>
+<li>Flink实现了仅处理一次（exactly-once）和至少(At-least-once)处理一次的语义；</li>
+<li>Flink处理性能非常好。吞吐量在百万量级上处理延迟在毫秒级。同时Flink应用的规模可以扩展到一千多个核；</li>
+<li>Flink为常见的功能提供了高级API，例如Window操作。同时也提供底层API以便满足用户的个性化需求；</li>
+<li>Flink生态非常丰富，kafka、JDBC、HDFS等常用的大数据平台；</li>
+<li>Flink可以7*24小时高可用的运行，同时可以采用YARN和Apache Mesos部署，可以快速恢复和动态扩展任务的规模；</li>
+<li>Flink可以在不失去应用状态的情况下，动态更新代码或者合并不同版本的任务；</li>
+<li>系统对外提供Metrics用于采集系统或者应用的指标，帮助用户识别问题；</li>
+<li>最后一点，但是不是最终的一点。Flink已经是一个成熟的处理器；</li>
+</ul>
+<p>除了以上功能外，Flink对外提供的API是非常有好的，并且允许Flink应用在IDE里运行于单个JVM上。这对开发者在IDE上调试Flink任务是非常有用的。</p>
+<p>以下我们在本地集群上部署并执行第一个Flink程序，以便我们直观的感受这些特性。我们采用随机生成的温度数据聚合为例。运行环境需要Unix, java7。如果你运行在windows上，建议按照Linux虚拟机或者Cygwin。</p>
+<p>1、到Apache 官网flink.apache.org下载二进制的Apache Flink 1.1.3（Hadoop 2.7，Scala 2.11)</p>
+<p>2、执行一下命令解压压缩文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar xvfz flink-1.1.3-bin-hadoop27-scala_2.11.tgz</div></pre></td></tr></table></figure></p>
+<p>3、启动Flink的本地模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd flink-1.1.3</div><div class="line">./bin/start-local.sh</div></pre></td></tr></table></figure></p>
+<p>4、在浏览器中输入<a href="http://localhost:8081打开监控页面。将会看一些统计之宝，表明本地Flink集群已经启动。它将显示单个任务管理器（Flink的工作进程）已连接，并且单个任务槽（由任务管理器提供的资源单元）可用。" target="_blank" rel="external">http://localhost:8081打开监控页面。将会看一些统计之宝，表明本地Flink集群已经启动。它将显示单个任务管理器（Flink的工作进程）已连接，并且单个任务槽（由任务管理器提供的资源单元）可用。</a></p>
+<img src="/images/流数据处理介绍/DashboardScreenshot1.png" class="full-image" title="图（E）">
+<p>5、下载测试用例。<br>wget <a href="https://streaming-with-flink.github.io/examples/download/examples-scala.jar" target="_blank" rel="external">https://streaming-with-flink.github.io/examples/download/examples-scala.jar</a></p>
+<p>注：你需要自己通过README打包项目为jar包。</p>
+<p>6、在本地集群上提交测试用例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/flink run -c io.github.streamingwithflink.AverageSensorReadings examples-scala.jar</div></pre></td></tr></table></figure></p>
+<p>7、打开web监控将看到一个运行的job。可以点击job链接查看job的监控信息</p>
+<img src="/images/流数据处理介绍/DashboardScreenshot2.png" class="full-image" title="图（F）">
+<p>8、Apache Flink集群默认数据输出的路径为./out。可以通过如下命令看看输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tail -f ./log/flink-&lt;user&gt;-jobmanager-&lt;hostname&gt;.out</div></pre></td></tr></table></figure></p>
+<p>将在终端看到如下类似信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">SensorReading(sensor_2,1480005737000,18.832819812267438)</div><div class="line">SensorReading(sensor_5,1480005737000,52.416477673987856)</div><div class="line">SensorReading(sensor_3,1480005737000,50.83979980099426)</div><div class="line">SensorReading(sensor_4,1480005737000,-17.783076985394775)</div></pre></td></tr></table></figure></p>
+<p>9、至此，已经运行了一个流计算程序。程序需要手动停止，可以在监控页面操作，可以在命令行下操作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/stop-local.sh</div></pre></td></tr></table></figure></p>
+<p>到这里已经知道如何按照和运行Flink程序。在这本书中还可以学到更多关于Flink的知识。</p>
+<p>为了支持作者，如果您觉得本书可以，请购买书籍。</p>
+<p>参考文献：<br>《Stream Processing with Apache Flink》</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 大数据 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 流处理 </tag>
+            
+            <tag> Flink </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[科学上网的最终秘籍]]></title>
+      <url>/2017/11/11/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91%E7%9A%84%E7%A7%98%E7%B1%8D/</url>
+      <content type="html"><![CDATA[<p>本文主要介绍使用云服务器加Shadowsocks搭建属于自己的VPN。之前使用各种商用的VPN，一段时间后要么服务不稳定要么就服务提供商请去喝茶了。前一段时间所有商用VPN都不可以使用了，就想着自己搭建一个专属VPN。在网上找了一些资料以后就开始动手搭建属于自己的VPN。</p>
+<h2 id="选择云服务器"><a href="#选择云服务器" class="headerlink" title="选择云服务器"></a>选择云服务器</h2><p>服务器的选择非常关键，一定要选择国外的提供商。国内的服务提供商很容易受到政策的影响。我这里根据[1]推荐使用以下服务器提供商：</p>
+<ul>
+<li>首推三家知名服务商：<ul>
+<li>DigitalOcean: <a href="https://www.digitalocean.com/" target="_blank" rel="external">https://www.digitalocean.com/</a> <a href="https://m.do.co/c/b44047087aaa" target="_blank" rel="external">欢迎大家使用我的推荐链接注册：</a></li>
+<li>Vultr: <a href="https://www.vultr.com" target="_blank" rel="external">https://www.vultr.com</a></li>
+<li>Linode: <a href="https://www.linode.com" target="_blank" rel="external">https://www.linode.com</a></li>
+</ul>
+</li>
+<li>日本的服务商：<ul>
+<li>维基百科地址： <a href="https://romanrm.net/vps/japan" target="_blank" rel="external">https://romanrm.net/vps/japan</a></li>
+</ul>
+</li>
+<li>美国的服务商：<ul>
+<li>CloudWays: www.cloudways.com</li>
+</ul>
+</li>
+</ul>
+<p>本人亲测，DigitalOcean服务稳定性良好持续运行一个多月未出问题，界面操作相对简单。接下来就介绍如配置DigitalOcean。</p>
+<h2 id="DigitalOcean配置"><a href="#DigitalOcean配置" class="headerlink" title="DigitalOcean配置"></a>DigitalOcean配置</h2><p>首先需要注册一个账号，激活邮箱一个，首次使用有奖励金。其次，需要准备一张信用卡或者向账号内充值5$才能创建虚拟机。账号安装官网的操作流程注册，账号注册完以后，就开始搭建环境。</p>
+<h3 id="虚拟服务器配置"><a href="#虚拟服务器配置" class="headerlink" title="虚拟服务器配置"></a>虚拟服务器配置</h3><p>首先在Droplets选项下点击Create按钮开始创建虚拟服务器（Droplets）。服务器系统建议选用Ubuntu 16.0x.xx，服务选用标准版里面最低配置一般就能够满足需求，虚拟服务地址（根据自己常访问网站所在地选择），选择支持IPv6，如果前面个人设置中已经添加了ssh-key就选择已经添加的，建议先在个人设置中配置ssh（否则暂时忽略），最后为自己的服务器选择一个名字，至此已经创建好虚拟服务器。接下来我将讲解通过ssh如何远程登录这台虚拟机。远程登录这台虚拟机需要完成以下两个步骤：一、生产属于自己的公钥和私钥；二、将公钥放到网站的设置中。</p>
+<h3 id="ssh配置"><a href="#ssh配置" class="headerlink" title="ssh配置"></a>ssh配置</h3><p>SSH key[2]是一个简单而又安全地连接到你的远端设备的方式，通过它你不需要在网络上传输你的密码。SSH key 有 public 和 private 两部分，其中 private 部分存储在你的设备本地，而 public 部分则需要上传到远程设备上。当你通过 ssh 连接到远程设备上时，只有私钥和公钥匹配上才能登陆。</p>
+<h4 id="创建ssh-key"><a href="#创建ssh-key" class="headerlink" title="创建ssh key"></a>创建ssh key</h4><p>第一步：先查看以下 ~/.ssh目录下是否已经有\*.pub文件，如果有请直接跳转到第三步；<br>第二步：运行如下命令，生成key<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ssh-keygen -t rsa -C &quot;email@example.com&quot;  </div><div class="line">注:email@example.com 为自己的邮箱，操作过程中一路回车就OK；</div></pre></td></tr></table></figure></p>
+<p>第三步：将~/.ssh/id_rsa.pub 文件里面的内容copy到DigitalOcean上。操作路径：点击个人-&gt;settings-&gt;Security-&gt;ssh-key-&gt;Add SSH Key。添加完成就可以远程通过访问虚拟服务器了。<br>第四步：访问远程服务器的方式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh root@ipv4</div></pre></td></tr></table></figure></p>
+<p>注：ipv4的地址为虚拟服务器地址，可以在虚拟服务器的首页查看到，用户名默认为root。</p>
+<h3 id="配置shadowsocks"><a href="#配置shadowsocks" class="headerlink" title="配置shadowsocks"></a>配置shadowsocks</h3><p>一、在远程服务器上安装shadowsocks<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">apt-get install python-pip</div><div class="line">pip install shadowsocks</div><div class="line"></div><div class="line">注：如果依赖缺失可以根据提示解决即可，也可运行如下命令更新依赖</div><div class="line">yum install python-setuptools &amp;&amp; easy_install pip</div></pre></td></tr></table></figure></p>
+<p>二、启动服务器上的shadowsocks服务，通过运行如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">ssserver -p 8836 -k 你设置的密码 -m rc4-md5</div><div class="line"></div><div class="line"># 或者可以通过以下指令在后台启动shadowsocks的服务：</div><div class="line">ssserver -p 8836 -k 你设置的密码 -m rc4-md5 -d start</div><div class="line">ssserver -p 8836 -k 你设置的密码 -m rc4-md5 -d stop</div></pre></td></tr></table></figure></p>
+<p>但上面的方法很不方便，我还是推荐使用配置文件的方法。首先创建一个文件：/etc/shadowsocks.json，示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;server&quot;:&quot;你的服务器ip地址&quot;,</div><div class="line">    &quot;server_port&quot;:8388,</div><div class="line">    &quot;local_address&quot;: &quot;127.0.0.1&quot;,</div><div class="line">    &quot;local_port&quot;:1080,</div><div class="line">    &quot;password&quot;:&quot;你设置的密码&quot;,</div><div class="line">    &quot;timeout&quot;:300,</div><div class="line">    &quot;method&quot;:&quot;aes-256-cfb&quot;,</div><div class="line">    &quot;fast_open&quot;: false</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接下来你就可以使用下面这个指令启动服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">ssserver -c /etc/shadowsocks.json</div><div class="line"></div><div class="line"># 或者在后台运行</div><div class="line">ssserver -c /etc/shadowsocks.json -d start</div><div class="line">ssserver -c /etc/shadowsocks.json -d stop</div></pre></td></tr></table></figure></p>
+<p>三、使用shadowsocks客户端<br>shadowsocks的客户端支持各大主流平台，而且客户端的配置一般都很简单，只需要配置一下服务器的ip地址和之前设置好的连接密码即可。</p>
+<p><a href="https://shadowsocks.org/en/download/clients.html" target="_blank" rel="external">shadowsocks下载地址1</a><br><a href="https://shadowsocks.org/en/download/clients.html" target="_blank" rel="external">shadowsocks下载地址2</a><br><a href="https://sourceforge.net/projects/shadowsocksgui/files/dist/" target="_blank" rel="external">window</a>/<a href="https://github.com/shadowsocks/shadowsocks-iOS/wiki/Help" target="_blank" rel="external">os X</a><br><a href="https://github.com/shadowsocks/shadowsocks/wiki/Ports-and-Clients#android" target="_blank" rel="external">Android</a>/<a href="https://github.com/shadowsocks/shadowsocks-iOS/wiki/Help" target="_blank" rel="external">iOS</a>  </p>
+<h2 id="注意事项："><a href="#注意事项：" class="headerlink" title="注意事项："></a>注意事项：</h2><p>1、 端口记得打开：<a href="https://www.micronbot.com/Linux/13.html" target="_blank" rel="external">https://www.micronbot.com/Linux/13.html</a><br>iptables -I INPUT -p tcp –dport 8858 -j ACCEPT<br>iptables-save</p>
+<p>2、 安装shadowsocks报错<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">root@seth:~# pip install shadowsocks</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/usr/bin/pip&quot;, line 11, in &lt;module&gt;</div><div class="line">    sys.exit(main())</div><div class="line">  File &quot;/usr/lib/python2.7/dist-packages/pip/__init__.py&quot;, line 215, in main</div><div class="line">    locale.setlocale(locale.LC_ALL, &apos;&apos;)</div><div class="line">  File &quot;/usr/lib/python2.7/locale.py&quot;, line 581, in setlocale</div><div class="line">    return _setlocale(category, locale)</div><div class="line">locale.Error: unsupported locale setting</div><div class="line"></div><div class="line">解决方案参考链接：https://stackoverflow.com/questions/36394101/pip-install-locale-error-unsupported-locale-setting</div></pre></td></tr></table></figure></p>
+<p>参考文献：<br>[1] <a href="https://github.com/XetRAHF/TiZi_AcrossTheGreatWall" target="_blank" rel="external">科学上网的最终秘籍</a><br>[2] <a href="https://www.ssh.com/ssh/" target="_blank" rel="external">ssh官网</a><br>[3] <a href="https://sheng123.github.io/2017/07/25/digitalocean-and-shadowsocks/" target="_blank" rel="external">手把手教你用digitalocean和shadowsocks科学上网</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> other </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> VPN </tag>
+            
+            <tag> 翻墙 </tag>
+            
+            <tag> 科学上网 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Vector Matrix and Tensor Derivatives]]></title>
+      <url>/2017/08/06/Vector%20Matrix%20and%20Tensor%20Derivatives/</url>
+      <content type="html"><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><strong>目的:</strong> 本节主要讲述反向传播和一种采用链式法则计算梯度的方法。理解反向传播的处理过程对于理解、开发、设计、调试神经网络至关重要。</p>
+<p><strong>问题描述:</strong> 本节中主要解决已知函数 $f(x)$，求函数在 $x$ 的梯度，其中 $x$ 为输入向量。</p>
+<p><strong>目的：</strong> 回想一下神经网络这个特定问题中,其中 $f$ 相当于损失函数 $L(x)$ ,输入参数 $x$ 对应训练数据和神经网络中的权重。例如，损失函数是SVM损失函数，输入为训练数据 $\left (x_{i},y_{j} \right )$ , $i=1 \cdots N$ 和网络的权重 $W$ 和偏置 $b$ 。请注意通常在机器学习中我们认为训练数据是给定，权重是一个可控的变量。因此，我们采用反向传播可以非常容易求得输入$x$的梯度。在训练过程中，只需要计算参数 $W$, $b$ 的梯度，所以我们可以采用它来执行参数的迭代。然而，在后续课程中$x_i$的梯度在某些情况下同样有用，例如：用于可视化和解释神经网络的执行过程。</p>
+<p>如果您在参加本课程前已经了解了链式法则，我们乃鼓励您阅读本文。因为，本文以图解的形式讲解了反向传播的整个过程，对于理解反向传播能有一个直观的理解。</p>
+<h1 id="梯度"><a href="#梯度" class="headerlink" title="梯度"></a>梯度</h1><p>熟悉简单实例后，我们就能处理复杂函数求梯度。以两个变量相乘为例$f(x,y)=xy$，$x$， $y$ 的偏导分表为：</p>
+<p>$$f(x,y)=xy\rightarrow\frac{\partial f}{\partial x}=y\qquad\frac{\partial f}{\partial y}=x$$</p>
+<p>注解：请记住以下的演算。以下变化率标示函数在值附近无限小的区域内的变化率（如：一元函数的斜率）。</p>
+<p>$$\frac{df(x)}{dx} =\lim_{h \rightarrow 0}\frac{f(x+h)-f(x)}{h} $$</p>
+<p>采用等式左侧的符号表示函数 $f(x)$ 在 $x$ 处的微分。当 $h$ 比非常小时，上述表达是标示函数在此处的斜率。也就是说每个变量的导数标示整个表达式对于该变量的敏感度。例如：if $x=4$，$y=-3$ then $f(x,y)=-12$,此时函数 $f(x)$ 在 $x$ 处的微分为-3.这个表示，如果变量 $x$ 增加一小点，函数 $f(x)$ 的值将减少3倍。这个可以通过以下表达是看出$f(x,y)=f(x)+h*\frac{df(x)}{dx}$,类似的$\frac{df(x)}{dy}=4$,我们对 $h$ 增加一小点，函数的输出将增加 $4h$。</p>
+<blockquote>
+<p>每个变量的导数标示目标函数在此处的变化快慢。</p>
+</blockquote>
+<p>根据上述，偏导$\Delta f$是一个$\Delta f=[\frac{\partial f}{\partial x},\frac{\partial f}{\partial y}]=[y,x]$的向量。尽管梯度是一个向量，本文中为简述表达我们采用梯度 $x$ 标示偏导向量 $x$。</p>
+<p>我们可以求得两个变量相加的偏导：</p>
+<p>$$f(x)=x+y\rightarrow\frac{\partial f}{\partial x}=1\qquad\frac{\partial f}{\partial y}=1$$</p>
+<p>这个实例中，不管 $x$ 和 $y$ 是取什么值，函数对 $x$ 和 $y$的偏导都是1。也就是说 $x$ 、$y$ 的增长都会导致函数 $f$值的增长，并且这个值的增长比率只于实际的值 $x$ 和 $y$ 有关系（这个与两个变量的乘不一样）。最后一个case我们讨论Max操作：</p>
+<p>$$f(x)=max(x,y)\rightarrow\frac{\partial f}{\partial x}=1(x&gt;=y)\qquad\frac{\partial f}{\partial y}=1(y&gt;=x)$$</p>
+<p>这个函数中，两个变量较大的值的偏导为1，另外一个则为0。例如：当 $x=4$， $y=2$时，最大值为 $4$，这个函数在此处对于$y$值不敏感，也就是说，当我们在此处增加一个很小的$h$值函数还是输出4，对结果无影响，因此它的梯度为0。当然，当我们将$y$的值增加非常大时，将会对结果函数值产生影响，上述这种情况仅当$\lim_{h\to 0}$时候成立.</p>
+<h1 id="复合连锁法则"><a href="#复合连锁法则" class="headerlink" title="复合连锁法则"></a>复合连锁法则</h1><p>现在开始讲解更复杂的表达式的求解，目标函数由多个函数的组合，例如：$f(x,y,z)=(x+y)x$。这个表达式依然相对简单，我们采用它帮助直观我们理解反向传播。在这个例子中，我们将函数分解为两个表达式：$q=x+y$,$f=q*z$。在前面已经讲解过着两个函数如何求偏导。函数 $f$ 是 $q$ 和 $z$ 变量的乘积，所以，他们的偏导分别为$\frac{\partial f}{\partial q}=z$, $\frac{\partial f}{\partial z}=q$，其中 $q$为 $x$ 和 $y$ 的和，他们的$\frac{\partial q}{\partial x}=1$，$ \frac{\partial q}{\partial y}=1$。然而，在我们的使用中，我们无需关系 $q$ 值的偏导$\frac{\partial f}{\partial q}$的值，这个值在本应用场景没有用。我们只关系函数 $f$在值 $x$， $y$ ， $z$ 处的偏导。链式法则可以求得多个“链式”表达式的梯度。例如：$\frac{\partial f}{\partial x}=\frac{\partial f}{\partial q}\frac{\partial q}{\partial x}$。本例中我们可以通过两个偏导的乘积求得函数 $f$在 $x$的偏导。让我们来看一个python代码写的例子：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># set some inputs</span></div><div class="line">x = <span class="number">-2</span>; y = <span class="number">5</span>; z = <span class="number">-4</span></div><div class="line"></div><div class="line"><span class="comment"># perform the forward pass</span></div><div class="line">q = x + y <span class="comment"># q becomes 3</span></div><div class="line">f = q * z <span class="comment"># f becomes -12</span></div><div class="line"></div><div class="line"><span class="comment"># perform the backward pass (backpropagation) in reverse order:</span></div><div class="line"><span class="comment"># first backprop through f = q * z</span></div><div class="line">dfdz = q <span class="comment"># df/dz = q, so gradient on z becomes 3</span></div><div class="line">dfdq = z <span class="comment"># df/dq = z, so gradient on q becomes -4</span></div><div class="line"><span class="comment"># now backprop through q = x + y</span></div><div class="line">dfdx = <span class="number">1.0</span> * dfdq <span class="comment"># dq/dx = 1. And the multiplication here is the chain rule!</span></div><div class="line">dfdy = <span class="number">1.0</span> * dfdq <span class="comment"># dq/dy = 1</span></div></pre></td></tr></table></figure>
+<p>最后我们将梯度赋值给变量 $[dfdx, dfdy, dfdz]$, 这些值告诉我们函数 $f$ 对于 $x$， $y$， $z$的敏感度。这个简单的例子阐述了反向传播的过程。今后我们将采用更加简洁的写法，因此我们不使用 $df$。这个例子中使用 $dfdq$ 表示 $dq$梯度的最终输出。</p>
+<p>上面的计算过程通过下图图解：</p>
+<img src="/images/Vector Matrix and Tensor Derivatives/graph1.jpg" class="full-image">
+<h1 id="直观理解反向传播"><a href="#直观理解反向传播" class="headerlink" title="直观理解反向传播"></a>直观理解反向传播</h1><p>反向传播是一个优美的本地处理过程。图中每个计算单元获得输入后，可以立即算出输出值和当前梯度（local gradient）。值得注意的是，计算过程无需关系全图中的其他值，就可以计算出当前梯度。当全部的前向传播计算完以后，逆向传播就可以根据前向传播的值计算梯度。采用链式法则，可以计算出所有输入的偏导。</p>
+<blockquote>
+<p>神经网络中每个计算单元也可以采用链式法则求得输出值和每个变量的偏导。  </p>
+</blockquote>
+<p>接下来，让我们解释一下以上的例子。加法处理单元的输入 $[-2, 5]$ 计算结果为 $3$。加法处理计算完以后，接着输入每个变量的当前梯度$+1$ 。上图最终的输出结果为 $-12$。在反向传播的过程中运用链式法则求得加法计算单元的梯度为 $-4$。为表述直观，我们将每个单元的计算结果放在横线上，将反向传播的求得的结果放在横线下方。根据上面的计算方法，求得当前单元的梯度 $-4$。继续回退，就可以求得 $x$ 和 $y$ 的梯度（1*-4=-4）。有上计算可以获得，如果x、y的值降低，他们的和也降低，这个使得他们的乘积增加。</p>
+<p>反向传播可以理解为每个计算单元之间的作用使得最终结果是增大或减小（他们的增幅），如此影响最终的输出结果。</p>
+<h1 id="Sigmod函数"><a href="#Sigmod函数" class="headerlink" title="Sigmod函数"></a>Sigmod函数</h1><p>上述计算单元可以是任意的处理函数。每个不同的函数都可以当成一个处理单元，然后再将多个处理单元组合为一个大的处理单元（神经网络中就是有一个个小的处理单元组合而成），为了方便运算，我们可以对一个复杂处理进行分解。接下来我们以Sigmod函数为例分析如何拆解：</p>
+<p>$$f(W,x)=\frac{1}{1+e^{w0x0+w1x1+w2}}$$</p>
+<p>在随后的课程中，Sigmod激活函数是一个2维的核函数。在此先把它当做一个输入为 $w$，$x$的函数。这个函数有多个处理单元组成，这些加法、乘法、max处理单元以及在上面进行了讲解。</p>
+<p>$$f(x)=\frac{1}{x}\rightarrow\frac{\partial f}{\partial x}=-1/x^2$$</p>
+<p>$$f(x)=e^x\rightarrow\frac{\partial f}{\partial x}=e^x$$</p>
+<p>$$f_a(x)=ax\rightarrow\frac{\partial f}{\partial x}=a$$</p>
+<p>函数$f_a$分别表示上式中的常数 $c$ 和 $a$。这可以当做已有一个输入的特殊的加法和乘法处理单元。在整个处理过程如下：</p>
+<img src="/images/Vector Matrix and Tensor Derivatives/graph2.jpg" class="full-image">
+<p>由上处理可知，一个长的链式处理函数可以通过 $w$，$x$之间的点乘获得计算结果。这个函数被称作为Sigmoid函数$\partial (x)$.这个函数的偏导可以采用一下方法求得：</p>
+<p>$$\partial (x)=\frac{1}{1+e^x}$$</p>
+<p>$$\rightarrow\frac{d\partial(x)}{dx}=\frac{e^{-x}}{(1+e^{-x})^2}=(\frac{1+e^{-x}-1}{1+e^{-x}})(\frac{1}{1+e^{-x}})=(1-\partial(x))(\partial(x))$$</p>
+<p>采用以上等式求函数的偏导变得非常简单。例如：sigmod函数输入 $1.0$在正向传播的时候输出 $0.73$。跟进这个表达是可以很快求得偏导 $（1-0.73）*0.73~=0.2$。接下来看一下核函数求偏导的处理代码：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">w = [<span class="number">2</span>,<span class="number">-3</span>,<span class="number">-3</span>] <span class="comment"># assume some random weights and data</span></div><div class="line">x = [<span class="number">-1</span>, <span class="number">-2</span>]</div><div class="line"></div><div class="line"><span class="comment"># forward pass</span></div><div class="line">dot = w[<span class="number">0</span>]*x[<span class="number">0</span>] + w[<span class="number">1</span>]*x[<span class="number">1</span>] + w[<span class="number">2</span>]</div><div class="line">f = <span class="number">1.0</span> / (<span class="number">1</span> + math.exp(-dot)) <span class="comment"># sigmoid function</span></div><div class="line"></div><div class="line"><span class="comment"># backward pass through the neuron (backpropagation)</span></div><div class="line">ddot = (<span class="number">1</span> - f) * f <span class="comment"># gradient on dot variable, using the sigmoid gradient derivation</span></div><div class="line">dx = [w[<span class="number">0</span>] * ddot, w[<span class="number">1</span>] * ddot] <span class="comment"># backprop into x</span></div><div class="line">dw = [x[<span class="number">0</span>] * ddot, x[<span class="number">1</span>] * ddot, <span class="number">1.0</span> * ddot] <span class="comment"># backprop into w</span></div><div class="line"><span class="comment"># we're done! we have the gradients on the inputs to the circuit</span></div></pre></td></tr></table></figure>
+<p>注：反向传播阶段。采用dot标示输入 $w$和 $x$的点乘。反向传播的过程中我们计算出每个变量的梯度。</p>
+<p>本节我们主要讲一种方便使用的方法计算正向传播与反向传播。在此基础上就可以直观的了解正向传播和反向传播的计算过程。本章还提供了计算代码。</p>
+<h1 id="反向传播实例：计算过程"><a href="#反向传播实例：计算过程" class="headerlink" title="反向传播实例：计算过程"></a>反向传播实例：计算过程</h1><p>接下来我们学习更复杂的实例:</p>
+<p>$$f(x,y)=\frac{x+\sigma(y)}{\sigma(x)+(x+y)^2}$$</p>
+<p>很显然，函数非常适合与用作方向传播的练习。应为我们采用之前的方法对 $x$ 和 $y$进行分解求偏导将非常复杂。然而，实时事实证明完全没有必要这样做，我们无需一个明确的函数来表示这个演变过程，我们只需要知道如何计算它。以下是正向传播的演变过程：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">x = <span class="number">3</span> <span class="comment"># example values</span></div><div class="line">y = <span class="number">-4</span></div><div class="line"></div><div class="line"><span class="comment"># forward pass</span></div><div class="line">sigy = <span class="number">1.0</span> / (<span class="number">1</span> + math.exp(-y)) <span class="comment"># sigmoid in numerator   #(1)</span></div><div class="line">num = x + sigy <span class="comment"># numerator                               #(2)</span></div><div class="line">sigx = <span class="number">1.0</span> / (<span class="number">1</span> + math.exp(-x)) <span class="comment"># sigmoid in denominator #(3)</span></div><div class="line">xpy = x + y                                              <span class="comment">#(4)</span></div><div class="line">xpysqr = xpy**<span class="number">2</span>                                          <span class="comment">#(5)</span></div><div class="line">den = sigx + xpysqr <span class="comment"># denominator                        #(6)</span></div><div class="line">invden = <span class="number">1.0</span> / den                                       <span class="comment">#(7)</span></div><div class="line">f = num * invden <span class="comment"># done!                                 #(8)</span></div></pre></td></tr></table></figure>
+<p>以上是正向传播计算的整个过程，我们引进了多个中间变量结构化代码，每个中间表达式都简单可以求偏导。因此，反向传播就比较容易算了。整个反向传播的计算代码如下：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># backprop f = num * invden</span></div><div class="line">dnum = invden <span class="comment"># gradient on numerator                             #(8)</span></div><div class="line">dinvden = num                                                     <span class="comment">#(8)</span></div><div class="line"><span class="comment"># backprop invden = 1.0 / den </span></div><div class="line">dden = (<span class="number">-1.0</span> / (den**<span class="number">2</span>)) * dinvden                                <span class="comment">#(7)</span></div><div class="line"><span class="comment"># backprop den = sigx + xpysqr</span></div><div class="line">dsigx = (<span class="number">1</span>) * dden                                                <span class="comment">#(6)</span></div><div class="line">dxpysqr = (<span class="number">1</span>) * dden                                              <span class="comment">#(6)</span></div><div class="line"><span class="comment"># backprop xpysqr = xpy**2</span></div><div class="line">dxpy = (<span class="number">2</span> * xpy) * dxpysqr                                        <span class="comment">#(5)</span></div><div class="line"><span class="comment"># backprop xpy = x + y</span></div><div class="line">dx = (<span class="number">1</span>) * dxpy                                                   <span class="comment">#(4)</span></div><div class="line">dy = (<span class="number">1</span>) * dxpy                                                   <span class="comment">#(4)</span></div><div class="line"><span class="comment"># backprop sigx = 1.0 / (1 + math.exp(-x))</span></div><div class="line">dx += ((<span class="number">1</span> - sigx) * sigx) * dsigx <span class="comment"># Notice += !! See notes below  #(3)</span></div><div class="line"><span class="comment"># backprop num = x + sigy</span></div><div class="line">dx += (<span class="number">1</span>) * dnum                                                  <span class="comment">#(2)</span></div><div class="line">dsigy = (<span class="number">1</span>) * dnum                                                <span class="comment">#(2)</span></div><div class="line"><span class="comment"># backprop sigy = 1.0 / (1 + math.exp(-y))</span></div><div class="line">dy += ((<span class="number">1</span> - sigy) * sigy) * dsigy                                 <span class="comment">#(1)</span></div><div class="line"><span class="comment"># done! phew</span></div></pre></td></tr></table></figure>
+<p>注意点：</p>
+<ol>
+<li>保留正向传播的计算结果，应为在反向传播过程中会使用到。但是如果太复杂了可以重新计算；  </li>
+<li>累加：正向传播过程多次使用 $x$、 $y$ 计算过程中需要注意+=、=等操作符，避免覆盖之前的旧值；</li>
+</ol>
+<h1 id="反向传播模式"><a href="#反向传播模式" class="headerlink" title="反向传播模式"></a>反向传播模式</h1><p>有趣的是反向传播通常可以以一种直观的方式阐述。例如神经网络中常用的三种计算（add、mul、max），在反向传播过程中都可以简单的阐述。让我们看一下一下的例子：</p>
+<img src="/images/Vector Matrix and Tensor Derivatives/graph3.jpg" class="full-image">
+<p>通过上图可知：<br><strong>加法操作</strong> 的梯度均匀分配给所有输入变量，不用管正向传播过程中的值。因为加法操作的局部梯度都是 $+1.0$，x*1.0保持不变，因此输出的梯度完全等于输入时的梯度。本例加法操作的梯度将2.0的局部梯度传递给两个输入变量，均保持不变；<br><strong>max操作</strong>与加法操作不一样，max操作将梯度传递给输入值大的。本例中因为 $1.0$大于 $-1$，所以在z出的梯度为 $2$，在w出的值为 $0$；<br><strong>乘法操作</strong>解释起来相对复杂一点。局部梯度输入值是根据链式法则来确定梯度的输出。在本例中 $x$的梯度为 $-4.00*2.00=-8.0$；</p>
+<p>不直观的影响以及他们的影响。请注意，如果乘法操作的其中一个输入非常小，而另外一个输入非常大，那么乘法处理就会出现如下现象，它将为小的输入分配一个较大的梯度，并为一个大的数据分配一个较小的梯度。在线下分类器权重和输入点的乘积$W^TX_i$中，意味着数据集的大小对梯度有较大的影响。例如，如果在预处理期间将数据$X_i*1000$意味着梯度也将扩大1000倍，所以必须通过降低学习率来补偿。</p>
+<h1 id="梯度计算中的向量运算"><a href="#梯度计算中的向量运算" class="headerlink" title="梯度计算中的向量运算"></a>梯度计算中的向量运算</h1><p>之前提的都是单个变量的处理，不过所有这些操作都适合于矩阵和向量计算。然是，在处理过程中需要注意维度。</p>
+<p><strong>矩阵-矩阵的梯度</strong>最复杂的处理是矩阵与矩阵的乘积：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># forward pass</span></div><div class="line">W = np.random.randn(<span class="number">5</span>, <span class="number">10</span>)</div><div class="line">X = np.random.randn(<span class="number">10</span>, <span class="number">3</span>)</div><div class="line">D = W.dot(X)</div><div class="line"></div><div class="line"><span class="comment"># now suppose we had the gradient on D from above in the circuit</span></div><div class="line">dD = np.random.randn(*D.shape) <span class="comment"># same shape as D</span></div><div class="line">dW = dD.dot(X.T) <span class="comment">#.T gives the transpose of the matrix</span></div><div class="line">dX = W.T.dot(dD)</div></pre></td></tr></table></figure>
+<p>tips：使用维度分析！我们无需记住他们的维度，因为可以通过推导获得 $dW$和 $dx$ 的维度。例如，我们知道计算后求得权重的梯度 $dW$ 的维度必须和 $W$计算后的的维度，计算后的维度取决于 $x$ 和 $dD$的乘积。总是存在一种方法可以计算出维度，因此维度分析是有效的。例如，$x$和 $dD$ 分别为 $[10*3]$, $[5*3]$的矩阵，根据维度分析，我们可以求得 $dW$ 和 $w$ 的维度为 $[5*10]$ 可以通过$dD.dot(X.T)$求得。</p>
+<p><strong>使用小的明确的例子</strong>有时很难求得复杂表达式的梯度。我们建议先将复杂表达是分解，然后在纸上推导出他们的求导过程。</p>
+<p>Erik Learned-Miller撰写了一个关于矩阵和向量求导的资料，<a href="http://cs231n.stanford.edu/vecDerivs.pdf" target="_blank" rel="external">点击直达</a>。 </p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>我们采用直观的流程图阐述梯度的计算过程，同时每个变量是如何影响函数的输出值。</li>
+<li>我们讨论了分阶段计算反向传播值。我们可以先将负责函数分解为可以求导的小模块，然后采用链式法则求得梯度。至关重要的是您无需将求导函数在纸上进行推导，您就可以求得每个变量偏导。因此，将表达式进行分解后可以分阶段计算操作值，然后通过反向传播求得梯度。</li>
+</ul>
+<p>在下节中，我们将开始学习定义神经网络，通过反向传播我们可以计算神经网络损失函数的梯度。换句话说，我们已经具备训练审定网络的能力，并掌握了本课程中比较难懂的概念！</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a href="http://cs231n.github.io/optimization-2/" target="_blank" rel="external">原英文地址：</a><br><a href="http://arxiv.org/abs/1502.05767" target="_blank" rel="external">Automatic differentiation in machine learning: a survey</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> deep learning </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Tensor </tag>
+            
+            <tag> Vector Matrix </tag>
+            
+            <tag> 深度学习 </tag>
+            
+            <tag> deep learn </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Flink Metrics]]></title>
+      <url>/2017/08/01/Flink%20Metrics/</url>
+      <content type="html"><![CDATA[<h1 id="Metrics"><a href="#Metrics" class="headerlink" title="Metrics"></a>Metrics</h1><p>Flink采用metric收集、暴露系统的监控指标。通常在编写程序的时候，通常会记录日志以便事后分析，在很多情况下是发现问题以后，再通过分析日志定位问题，这是一种事后的静态分析。metric能够帮助我们了解整个系统在当前，或者某一时刻运行的情况。</p>
+<p>比如，数据库监控：  </p>
+<ol>
+<li>最近一段时间内慢SQL的查询次数；</li>
+<li>查询时数据库的缓存命中率；</li>
+<li>cpu、内存的负载情况；</li>
+<li>查询、删除、插入在数据库表中间的分布</li>
+</ol>
+<p>实时或者准实时的收集这些指标信息，便于我们快速对系统做出响应以及优化，这是保障系统健康运行的重要手段。这些实时性能参数信息，对于一些高级应用场景，比如服务的熔断机制（统计服务调用失败和成功的比例）、告警机制，只有做到实时监控才能提供这些数据，才能实现这种提高系统稳健性的功能。</p>
+<p>在Java中有一个开源的名为Metrics的项目，它能够捕获JVM以及应用层面的性能参数，他的作者Coda Hale介绍了什么是Mertics并且为什么Metrics在应用程序系统中很有必要，视频<a href="https://www.youtube.com/watch?v=czes-oa0yik" target="_blank" rel="external">YouTube</a>。</p>
+<h1 id="Metrics注册"><a href="#Metrics注册" class="headerlink" title="Metrics注册"></a>Metrics注册</h1><p>Fink通过调用getRuntimeContext().getMetricGroup()访问metric系统中继承RichFunction的任何函数。通过这个方法可以创建或者注册一个Metrics。</p>
+<h1 id="Metics类型"><a href="#Metics类型" class="headerlink" title="Metics类型"></a>Metics类型</h1><p>Metrics提供了Gauge、Counter、Meter、Histogram、Timer等度量工具类以及Health Check功能。</p>
+<h2 id="Counter"><a href="#Counter" class="headerlink" title="Counter"></a>Counter</h2><p>Counter是一个64位的计数器。可以通过调用inc()/inc(long n)或者dec()/dec(long n)增加或者减少统计值。通过counter(String name)在MetricGroup中创建或注册一个Counter。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;String, Integer&gt; &#123;</div><div class="line">  private Counter counter;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    this.counter = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .counter(&quot;myCounter&quot;);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  @public Integer map(String value) throws Exception &#123;</div><div class="line">    this.counter.inc();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>当然也可以自己实现一个Counter:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;String, Integer&gt; &#123;</div><div class="line">  private Counter counter;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    this.counter = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .counter(&quot;myCustomCounter&quot;, new CustomCounter());</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="Gauge"><a href="#Gauge" class="headerlink" title="Gauge"></a>Gauge</h2><p>最简单的度量指标，只有一个简单的返回值。Flink中需要实现org.apache.flink.metrics.Gauge interface接口。返回的值对类型没有限制，通过调用gauge(String name, Gauge gauge)在MetricGroup中创建&amp;注册Gauge。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;String, Integer&gt; &#123;</div><div class="line">  private int valueToExpose;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .gauge(&quot;MyGauge&quot;, new Gauge&lt;Integer&gt;() &#123;</div><div class="line">        @Override</div><div class="line">        public Integer getValue() &#123;</div><div class="line">          return valueToExpose;</div><div class="line">        &#125;</div><div class="line">      &#125;);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>注：reporters会将返回的对象转换为String，所以需要实现toString()函数。</p>
+<h2 id="Histograms"><a href="#Histograms" class="headerlink" title="Histograms"></a>Histograms</h2><p>Histrogram是用来度量流数据中Value的分布情况，Histrogram可以计算最大/小值、平均值，方差，分位数（如中位数，或者95th分位数），如75%,90%,98%,99%的数据在哪个范围内。通过调用histogram(String name, Histogram histogram)在MetricGroup上注册一个Histogram。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;Long, Integer&gt; &#123;</div><div class="line">  private Histogram histogram;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    this.histogram = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .histogram(&quot;myHistogram&quot;, new MyHistogram());</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  @public Integer map(Long value) throws Exception &#123;</div><div class="line">    this.histogram.update(value);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Flink没有提供默认的Histogram的实现类，但是提供了<a href="https://github.com/apache/flink/blob/master/flink-metrics/flink-metrics-dropwizard/src/main/java/org/apache/flink/dropwizard/metrics/DropwizardHistogramWrapper.java" target="_blank" rel="external">Wrapper</a>调用Codahale/DropWizard使用histograms。使用Wrapper需在pom.xml中添加一下依赖：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">      &lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;flink-metrics-dropwizard&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;1.2.1&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure></p>
+<p>通过以下方式注册一个Codahale/DropWizard histogram：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;Long, Integer&gt; &#123;</div><div class="line">  private Histogram histogram;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    com.codahale.metrics.Histogram histogram =</div><div class="line">      new com.codahale.metrics.Histogram(new SlidingWindowReservoir(500));</div><div class="line"></div><div class="line">    this.histogram = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .histogram(&quot;myHistogram&quot;, new DropwizardHistogramWrapper(histogram));</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="Meter"><a href="#Meter" class="headerlink" title="Meter"></a>Meter</h2><p>Meter是一种只能自增的计数器，通常用来度量一系列事件发生的比率。他提供了平均速率，以及指数平滑平均速率，以及采样后的1分钟，5分钟，15分钟速率。Flink中通过markEvent(long n)注册一个需要监控的事件。调用meter(String name, Meter meter)在MetricGroup上注册。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;Long, Integer&gt; &#123;</div><div class="line">  private Meter meter;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    this.meter = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .meter(&quot;myMeter&quot;, new MyMeter());</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  @public Integer map(Long value) throws Exception &#123;</div><div class="line">    this.meter.markEvent();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>同样可以添加一下依赖调用Codahale/DropWizard meters的包装类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">      &lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;flink-metrics-dropwizard&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;1.2.1&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure></p>
+<p>采用一下方法注册一个包装类：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public class MyMapper extends RichMapFunction&lt;Long, Integer&gt; &#123;</div><div class="line">  private Meter meter;</div><div class="line"></div><div class="line">  @Override</div><div class="line">  public void open(Configuration config) &#123;</div><div class="line">    com.codahale.metrics.Meter meter = new com.codahale.metrics.Meter();</div><div class="line"></div><div class="line">    this.meter = getRuntimeContext()</div><div class="line">      .getMetricGroup()</div><div class="line">      .meter(&quot;myMeter&quot;, new DropwizardMeterWrapper(meter));</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="Timer"><a href="#Timer" class="headerlink" title="Timer"></a>Timer</h2><p>Metrics 本身还提供Timer监控请求的速率和处理时间（Flink中暂时未提供这个监控）。</p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>Scope：在Flink中监控范围分系统（System Scope）、用户级别（User Scope）。系统提供了一下常用的监控如cpu、内存、线程、垃圾回收、网络、类加载、检查点、集群、IO等监控。同时用户可以通过采用上面提及的范式进行埋点，统计监控系统相关的性能。</p>
+<p>Reporter：收集了这么多数据之后，我们需要把数据时实的动态展示或者保存起来。Flink Metric提供了多种的数据报告接口。Flink通过Reporter对外暴露监控指标。Flink提供JMX (org.apache.flink.metrics.jmx.JMXReporter)、Ganglia (org.apache.flink.metrics.ganglia.GangliaReporter)、Graphite (org.apache.flink.metrics.graphite.GraphiteReporter)、StatsD (org.apache.flink.metrics.statsd.StatsDReporter)四个Reporter。</p>
+<p>Dashboard：Flink提供了Dashboard可视化收集的metrics。</p>
+<p>具体的使用方法，请参考<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.2/monitoring/metrics.html" target="_blank" rel="external">Flink metrics</a>。  </p>
+<p>需要熟悉Flink源码，请参考org.apache.flink.metrics包，下面定义了一些接口和meter的可视化实例MeterViewTest。查看使用例子：StatsDReporterTest（testStatsDMetersReporting）可以采用单步调试的形式查看如何注册和发收metrics消息。</p>
+<h1 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h1><p><a href="http://colobu.com/2014/08/08/Metrics-and-Spring-Integration/" target="_blank" rel="external">Metrics介绍和Spring的集成</a><br><a href="http://www.cnblogs.com/yangecnu/p/Using-Metrics-to-Profiling-WebService-Performance.html" target="_blank" rel="external">使用Metrics监控应用程序的性能</a><br><a href="https://www.youtube.com/watch?v=czes-oa0yik" target="_blank" rel="external">Metrics, Metrics, Everywhere - Coda Hale</a><br><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.2/monitoring/metrics.html" target="_blank" rel="external">Flink metrics</a><br><a href="https://github.com/codahale/metrics" target="_blank" rel="external">codahale metrics</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> flink </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> flink </tag>
+            
+            <tag> metrics </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[atom编辑器]]></title>
+      <url>/2017/04/26/atom%E7%BC%96%E8%BE%91%E5%99%A8/</url>
+      <content type="html"><![CDATA[<h1 id="atom编辑器"><a href="#atom编辑器" class="headerlink" title="atom编辑器"></a>atom编辑器</h1><h2 id="总体介绍"><a href="#总体介绍" class="headerlink" title="总体介绍"></a>总体介绍</h2><p>此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ <a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。</p>
+<p>那它有哪些吸引人的特性，接下来我就介绍一下Atom的总体特性。Atom编辑器支持Windows、Mac、Linux三大桌面平台，完全免费，并且已经在GitHub上开放全部的源代码。Atom采用类似Sublime的包管理功能，支持插件扩展，可配置性非常高，可以根据自身的使用特点，按照不同的插件。Atom有着各种流行编辑器都有的特性，功能上非常丰富，支持各种编程语言的代码高亮（HTML / CSS / Javascript / PHP / Python / C / C++ / Objective C / Java / JSON / Perl / CoffeeScript / Go / Sass / YAML / Markdown 等等）和代码补全功能，极大的提高了编程效率。具有项目管理、git代码管理等特性。采用文档管理的形式管理，这就不会出现笔记越多，编辑器就运行越慢。</p>
+<p><strong> 注 </strong> 测试过100M左右的文件打开和编辑 ，反应速度确实比sublime要慢很多。大文件操作建议sublime操作，sublime编辑丢失的可能比较小，atom卡死后编辑会丢失。个人比较喜欢的是atom的插件和界面风格的简约，一般也不会编辑几十M的文件。</p>
+<p>先上一个页面直观感受一下：<br><img src="/images/atom编辑器/graph1.jpg" class="full-image"></p>
+<h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><p>Atom编辑器连接地址：<a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> 常见的使用功能和其他软件类似，本文就不做具体介绍。<br>本文主要介绍一下几点：</p>
+<ol>
+<li>插件添加 Atom -&gt; Preferences（Settings） -&gt; install 搜索需要按照的插件，找到后直接按照就ok。在Settings里面可以对已安装的插件进行管理。点击对应的插件，可以查看插件的功能说明和使用说明，其中包括常用的快捷键。对于之前安装好的插件，可以在package里面查找，点击插件同样可以查看使用说明。（如果不能安装，可以git上下载包放入~/.atom/packages目录，志辰提供），不适用的插件可以停了，加快atom的运行速度。</li>
+</ol>
+<img src="/images/atom编辑器/graph2.jpg" class="full-image">
+<ol>
+<li>快捷键的修改 Atom -&gt; Preferences（Settings） -&gt; KeyBindings 先找到需要修改的快捷键或者插件，然后点击快捷键前的复制按钮，最后将复制的代码粘贴到（your keymap file）。对于快捷键不要重复，重复可能导致快捷键无法使用。</li>
+</ol>
+<img src="/images/atom编辑器/graph3.jpg" class="full-image">
+<h2 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h2><h3 id="markdown-preview"><a href="#markdown-preview" class="headerlink" title="markdown-preview"></a>markdown-preview</h3><p>MarkDown文本预览器，有了这款插件可以把atom变成写markdown的神器。</p>
+<h3 id="markdown-scroll-sync"><a href="#markdown-scroll-sync" class="headerlink" title="markdown-scroll-sync"></a>markdown-scroll-sync</h3><p>markdown-scroll-sync将预览和编辑窗口同步滑动。</p>
+<h3 id="file-type-icons"><a href="#file-type-icons" class="headerlink" title="file-type-icons"></a>file-type-icons</h3><p>为各种不同的文件类型显示一个漂亮的ICON</p>
+<h3 id="Sublime-Style-Column-Selection"><a href="#Sublime-Style-Column-Selection" class="headerlink" title="Sublime-Style-Column-Selection"></a>Sublime-Style-Column-Selection</h3><p>Sublime的列编辑模式，atom默认对列编辑模式支持不够友好，安装这个插件可以获得很好的列编辑体验。</p>
+<h3 id="project-manager"><a href="#project-manager" class="headerlink" title="project-manager"></a>project-manager</h3><p>Atom默认关闭不保持当前编辑状态，下次需要自己打开对于的文件，project-manager可以帮助用户保持当前的工作窗口状态。</p>
+<h3 id="markdown-image-paste"><a href="#markdown-image-paste" class="headerlink" title="markdown-image-paste"></a>markdown-image-paste</h3><p>图片、截屏粘贴。默认快捷键ctrl-v；</p>
+<h3 id="markdown-pdf"><a href="#markdown-pdf" class="headerlink" title="markdown-pdf"></a>markdown-pdf</h3><p>支持查看pdf文件</p>
+<h3 id="markdown-table-editor"><a href="#markdown-table-editor" class="headerlink" title="markdown-table-editor"></a>markdown-table-editor</h3><p>一直对Markdown的table语法很无爱，直到遇到了markdown-table-editor，这操作效率简直炸了！文字已经不能表达我的激动之情了，直接看图吧。编辑完以后自动对齐。</p>
+<img src="/images/atom编辑器/graph4.jpg" class="full-image">
+<p>Atom有许多各种各样的插件，用户根据自己的需求，安装对应的插件。</p>
+<p>最近因为使用atom，又研究了一下sublime的一些插件，发现sublime有很多功能未发现。atom相对是使用上还是比较卡，建议采用sublime。sublime的使用方法和atom类似，可以通过安装插件和设置增强sublime的功能。</p>
+<p>下面添加一下sublime的常用插件：</p>
+<ul>
+<li>SideBar Enhancements　　这个插件改进了侧边栏，增加了许多功能</li>
+<li>tableedit   表格编辑器</li>
+<li>MarkdownEditing  markdown编辑</li>
+<li>file icon  文件icon</li>
+<li>Bracket Highlighter：匹配括号</li>
+<li>Alignment : 等号对齐</li>
+<li>image2tage : 图片标签</li>
+<li>omnimarkuppreviewer : markdown实时预览</li>
+<li>Boxy Theme : 主题</li>
+<li>side bar : 文件操作插件</li>
+</ul>
+<p>sublime 常用命令mac：</p>
+<ul>
+<li>（command + shift + p）进入命令模式，可以按照插件，删除插件或者运行插件的命令；</li>
+<li>（command + p） 查找文件；</li>
+</ul>
+<p>附上sublime的设置：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;color_scheme&quot;: &quot;Packages/Boxy Theme/schemes/Boxy Ocean.tmTheme&quot;,</div><div class="line">    &quot;draw_white_space&quot;: &quot;all&quot;,</div><div class="line">    &quot;file_exclude_patterns&quot;:</div><div class="line">    [</div><div class="line">        &quot;*.pyc&quot;,</div><div class="line">        &quot;*.pyo&quot;,</div><div class="line">        &quot;*.exe&quot;,</div><div class="line">        &quot;*.dll&quot;,</div><div class="line">        &quot;*.obj&quot;,</div><div class="line">        &quot;*.o&quot;,</div><div class="line">        &quot;*.a&quot;,</div><div class="line">        &quot;*.lib&quot;,</div><div class="line">        &quot;*.so&quot;,</div><div class="line">        &quot;*.dylib&quot;,</div><div class="line">        &quot;*.ncb&quot;,</div><div class="line">        &quot;*.sdf&quot;,</div><div class="line">        &quot;*.suo&quot;,</div><div class="line">        &quot;*.pdb&quot;,</div><div class="line">        &quot;*.idb&quot;,</div><div class="line">        &quot;.DS_Store&quot;,</div><div class="line">        &quot;*.class&quot;,</div><div class="line">        &quot;*.psd&quot;,</div><div class="line">        &quot;*.db&quot;,</div><div class="line">        &quot;*.sublime-workspace&quot;,</div><div class="line">        &quot;*.doc*&quot;,</div><div class="line">        &quot;*.xls*&quot;</div><div class="line">    ],</div><div class="line">    &quot;folder_exclude_patterns&quot;:</div><div class="line">    [</div><div class="line">        &quot;.svn&quot;,</div><div class="line">        &quot;.repo&quot;,</div><div class="line">        &quot;.git&quot;,</div><div class="line">        &quot;.hg&quot;,</div><div class="line">        &quot;CVS&quot;</div><div class="line">    ],</div><div class="line">    &quot;font_size&quot;: 15,</div><div class="line">    &quot;ignored_packages&quot;:</div><div class="line">    [</div><div class="line">        &quot;Vintage&quot;</div><div class="line">    ],</div><div class="line">    &quot;theme&quot;: &quot;Boxy Ocean.sublime-theme&quot;,</div><div class="line">    &quot;translate_tabs_to_space&quot;: true,</div><div class="line">    &quot;wrap_width&quot;: 80</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+]]></content>
+      
+        <categories>
+            
+            <category> other </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> atom </tag>
+            
+            <tag> sublime </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Beringei时序数据库]]></title>
+      <url>/2017/03/13/Beringei%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/</url>
+      <content type="html"><![CDATA[<h1 id="Beringei时序数据库"><a href="#Beringei时序数据库" class="headerlink" title="Beringei时序数据库"></a>Beringei时序数据库</h1><p>Facebook于2017年2月3日宣布开源他们的高性能时序数据存储引擎Beringer。Berigei内存数据库是用来解决Facebook内部监控数据存储和查询需求的数据库，具有快速读写、高压缩比等特性。本文将从应用场景、设计思路和特点详细介绍Beringei。</p>
+<h2 id="Beringer诞生背景"><a href="#Beringer诞生背景" class="headerlink" title="Beringer诞生背景"></a>Beringer诞生背景</h2><p>Facebook运维大规模的分布式服务，需要监控系统的运行状况和性能指标，以便第一时间发现、诊断、处理出现的问题。Facebook使用时序数据库（TSDB）跟踪和存储系统度量指标，如：cpu、内存、网络，以及服务的统计信息（缓存命中率、mysql查询速率）等，基于这些数据运维人员就可以看到基础设施上的实时负载情况，并作出相应的决策。</p>
+<p>Facebook早期采用采用Hbase存储ODS（Operational Data Store）数据。随着系统的不断发展，2013年初，存储引擎监控团队发现Hbase无法灵活扩展，将导致未来无法处理高并发的读取负载。如：同时分析几千个时序数据，将需要几十秒的时间才能返货，对于稀疏数据查询执行时间更长，甚至会出现查询超时。存储引擎监控团队评估和否决了几款基于磁盘和现有内存缓存的解决方案（OpenTSDB压缩率不足，还可能导致数据精度下降；Whisper不支持数据时序抖动，且不是内存数据库，性能不足；InfluxDB由于支持Meta存储，压缩率不足导致内存利用率下降）。</p>
+<p>为了满足以上场景和解决以上问题，Beringer必须满足高并发写（TPS：1000w/s）、快速响应查询（如：小窗口聚集查询——最近1~2小时的聚合操作）、存储最近26小时的数据共读写（Facebook 85%的查询是最近26小时的数据）、采用ClusterFS持久化数据、容错能力（容灾、宕机恢复）、水平扩展等场景。 Facebook监控团队在VLD2015大会上发表一篇名为《Gorilla：A Fast, Scalable, In-Memory Time Series Database》的文章，Beringer正是基于这项工作成果的进一步发展。</p>
+<h2 id="Beringer设计思路"><a href="#Beringer设计思路" class="headerlink" title="Beringer设计思路"></a>Beringer设计思路</h2><p>设计Beringer的初衷是为了满足更高的写入速率和更低的读取延迟，同时尽可能高效的利用内存来存储时间序列的数据。Facebook团队通过分析监控数据发现，大多数时间序列中的值和相邻数据点的值并没有显著变化且许多数据源值存储整数（系统支持浮点数），所以Facebook采用delta-of-delta编码压缩时间戳，采用XOR压缩64位的浮点数。接下来让我们介绍一下</p>
+<h3 id="时间戳压缩算法"><a href="#时间戳压缩算法" class="headerlink" title="时间戳压缩算法"></a>时间戳压缩算法</h3><p>时间戳的压缩算法采用delta-of-delta编码，具体的算法步骤如下：</p>
+<ol>
+<li>头部存储序列的起始时间戳$t_1$，他与两小时的窗口对其，第一个时间戳$t_0$采用14bit存储$t_1-t_2$的deta值;</li>
+<li>对于接下来的时间戳$t_n$:<ol>
+<li>计算delta of delta：$D=(t<em>{n-t}-t</em>{n-1})-(t<em>{n-1}-t</em>{n-2})$;</li>
+<li>如果D=0，则存储bit ‘0’；</li>
+<li>如果$D\in[-63, 64]$，存储’10’，然后在接下来的7bit中存储delta值；</li>
+<li>如果$D\in[-255, 256]$，存储’110’，然后在接下来的9bit中存储delta值；</li>
+<li>如果$D\in[-2047, 2048]$，存储’1110’，然后在接下来的12bit中存储delta值；</li>
+<li>否则，存储’1111’，然后在接下来的32bit中存储delta值；</li>
+</ol>
+</li>
+</ol>
+<p>如<strong> 图1. </strong> 采用时间压缩算法得：Header存储时间T 2015.03.24 02:00:00；紧接着存储第一个时间点$T_1$ 2015.03.24 02:00:00与Hearder T时间2015.03.24 02:01:02的$t$差值62；第二个时间点$T_2$ 2015.03.24 02:02:02与$t_1$的差值$deltaT_1$ 60，$T_2$ 60与$T_1$ 62的差值-2(既delta of delta),则存储标记位’10’ 然后存储值-2；$T_3$ 2015.03.24 02:03:02与$T_2$ 2015.03.24 02:02:02的差值$delta_3$为0，直接存储标记位’0’。</p>
+<h3 id="值压缩算法"><a href="#值压缩算法" class="headerlink" title="值压缩算法"></a>值压缩算法</h3><p>值的压缩算法采用XOR编码，具体的算法步骤如下：</p>
+<ol>
+<li>第一个值不压缩，直接存储值；</li>
+<li>如果XOR的值为0（与之前的值一样），则存储bit ‘0’</li>
+<li>如果XOR的值不为0，计算XOR后前置0和尾部0的值，存储bit ‘1’，然后存储a）或b）：<br>&emsp; a)控制位’0’，如果meaning值的bit块落在之前meaning值的bit块内，（当前块前置0和后置0的个数与之前值的个数一样），存储meaning值的bit块；<br>&emsp; b)控制位’1’，否则，采用5bit存储前置0的位置值，然后采用6bit存储XOR后的meaning值；</li>
+</ol>
+<p>如<strong> 图1. </strong> 采用值压缩算法得：$T_1$时刻的值$Value_1$ 12 直接存储；$T_2$时刻的值$Value_2$ 12与$T_1$时刻的值$Value_1$ 12的差值$deltaV_2$ 0，所以直接存储标记位’0’；因为$T_2$时刻没有有meaning值，所以   $T_3$时刻的值$Value_3$ 24 与$T_2$ 时刻的值做XOR运算，存储控制为’11’,然后采用5bit存储XOR值的第一个bit位为1的值11，接着采用6 bit存储XOR后meaning值的bit的长度1，最后存储meaning值的bit块。（如果XOR之后的Meaning块落在之前XOR后的Meaning块内，则存储控制位’10’，然后存储Meaning值的bit块）</p>
+<img src="/images/Beringei时序数据库/graph1.png" class="full-image" title="图1. 压缩算法">
+<p>采用以上两个算法压缩Facebook的监控数据，可知压缩比极高。<br>时间戳压缩算法，得到各标志位的分布比例如图2。96%的时间戳可以用1bit存储，压缩比极高。</p>
+<img src="/images/Beringei时序数据库/graph2.png" class="full-image" title="图2. 时间戳压缩算法各bit位分布比">
+<p>分体值压缩算法，得到各标志位的分布比例如图3。其中标志位’0’占1bit占比51%，标志位’10’的值占26.6bit占比30%，标志位’11’占36.9bit占比19%。<br><img src="/images/Beringei时序数据库/graph3.png" class="full-image" title="图3. 值压缩算法各bit位分布比"></p>
+<h3 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h3><p>每两小时产生一个Block块。ShardMap为Vector存储Block块的key和TSmap的地址映射关系。TSmap存储所shards Block块地址和key的映射关系，这样就可以快速复制内存中的数据。Facebook内存存储结构，当无头的数据块还没有刷新时宕机，数据将会丢失。当然，内存数据同样需要持久化硬盘上，当块形成后，Facebook采用Hbase持久化内存数据块。</p>
+<img src="/images/Beringei时序数据库/graph4.png" class="full-image" title="图4. 值压缩算法各bit位分布比">
+<h2 id="Beringei总结"><a href="#Beringei总结" class="headerlink" title="Beringei总结"></a>Beringei总结</h2><p>虽然Beringei算法简单，压缩比和性能都有较大的提高，但是采用Beringei存储监控数据需要case by case的分析业务场景，只有业务场景和Beringei设计原则吻合才能达到较好的压缩比。其次，Beringei部署需要依赖较多的其他框架，部署环境不友好，且Beringei需要持久化数据库支撑。</p>
+<h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a href="http://www.vldb.org/pvldb/vol8/p1816-teller.pdf" target="_blank" rel="external">Gorilla论文地址</a><br><a href="https://github.com/facebookincubator/beringei" target="_blank" rel="external">Beringei代码库</a><br><a href="https://yq.aliyun.com/articles/69354" target="_blank" rel="external">深度解读Facebook刚开源的beringei时序数据库</a><br><a href="http://weixin.niurenqushi.com/article/2017-02-12/4766476.html" target="_blank" rel="external">Facebook开源内存数据库Beringei，追求极致压缩率</a><br><a href="http://www.cnblogs.com/mlog/archive/2010/12/16/2456368.html" target="_blank" rel="external">浮点数标示方法：fast lossless compression of scientific floating-point data</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 大数据 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 数据库 </tag>
+            
+            <tag> 时序 </tag>
+            
+            <tag> Beringei </tag>
+            
+            <tag> facebook </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[markdown语法]]></title>
+      <url>/2017/01/26/MacDown/</url>
+      <content type="html"><![CDATA[<p># MacDown</p>
+<p><img src="http://macdown.uranusjr.com/static/base/img/logo-160.png" alt="MacDown logo"></p>
+<p>Hello there! I’m **MacDown**, the open source Markdown editor for OS X.</p>
+<p>Let me introduce myself.</p>
+<p>## Markdown and I</p>
+<p>**Markdown** is a plain text formatting syntax created by John Gruber, aiming to provide a easy-to-read and feasible markup. The original Markdown syntax specification can be found <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank" rel="external">here</a>.</p>
+<p>**MacDown** is created as a simple-to-use editor for Markdown documents. I render your Markdown contents real-time into HTML, and display them in a preview panel.</p>
+<p><img src="http://d.pr/i/10UGP+" alt="MacDown Screenshot"></p>
+<p>I support all the original Markdown syntaxes. But I can do so much more! Various popular but non-standard syntaxes can be turned on/off from the <a href="\#markdown-pane">**Markdown** preference pane</a>.</p>
+<p>You can specify extra HTML rendering options through the <a href="\#rendering-pane">**Rendering** preference pane</a>.</p>
+<p>You can customize the editor window to you liking in the <a href="\#editor-pane">**Editor** preferences pane</a>:</p>
+<p>You can configure various application (that’s me!) behaviors in the <a href="\#general-pane">**General** preference pane</a>.</p>
+<p>## The Basics</p>
+<p>Before I tell you about all the extra syntaxes and capabilities I have, I’ll introduce you to the basics of standard markdown. If you already know markdown, and want to jump straight to learning about the fancier things I can do, I suggest you skip to the <a href="\#markdown-pane">**Markdown** preference pane</a>. Lets jump right in.</p>
+<p>### Line Breaks</p>
+<p>To force a line break, put two spaces and a newline (return) at the end of the line.</p>
+<p> These lines</p>
+<p> won’t break</p>
+<p> These lines</p>
+<p> will break</p>
+<p>### Strong and Emphasize</p>
+<p>**Strong**: <code>\*\*Strong\*\*</code> or <code>\_\_Strong\_\_</code> (Command-B)</p>
+<p>*Emphasize*: <code>\*Emphasize\*</code> or <code>\_Emphasize\_</code>[^emphasize] (Command-I)</p>
+<p>### Headers (like this one!)</p>
+<p> Header 1</p>
+<p> ========</p>
+<p> Header 2</p>
+<hr>
+<p>or</p>
+<p> # Header 1</p>
+<p> ## Header 2</p>
+<p> ### Header 3</p>
+<p> #### Header 4</p>
+<p> ##### Header 5</p>
+<p> ###### Header 6</p>
+<p>### Links and Email</p>
+<p>#### Inline</p>
+<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#x6d;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x75;&#114;&#97;&#110;&#117;&#x73;&#x6a;&#x72;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#46;&#x63;&#111;&#x6d;&#92;">&#x75;&#114;&#97;&#110;&#117;&#x73;&#x6a;&#x72;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#46;&#x63;&#111;&#x6d;&#92;</a></p>
+<p><code>\&lt;uranusjr@gmail.com\&gt;</code></p>
+<p>Same thing with urls: \<a href="http://macdown.uranusjr.com\" target="_blank" rel="external">http://macdown.uranusjr.com\</a></p>
+<p><code>\&lt;http://macdown.uranusjr.com\&gt;</code></p>
+<p>Perhaps you want to some link text like this: <a href="http://macdown.uranusjr.com" title="Title" target="_blank" rel="external">Macdown Website</a></p>
+<p><code>[Macdown Website](http://macdown.uranusjr.com &quot;Title&quot;)</code> (The title is optional)</p>
+<p>#### Reference style</p>
+<p>Sometimes it looks too messy to include big long urls inline, or you want to keep all your urls together.</p>
+<p>Make <a href="http://macdown.uranusjr.com" title="Title" target="_blank" rel="external">a link</a> <code>[a link][arbitrary\_id]</code> then on it’s own line anywhere else in the file:</p>
+<p><code>[arbitrary\_id]: http://macdown.uranusjr.com &quot;Title&quot;</code></p>
+<p>If the link text itself would make a good id, you can link <a href="http://macdown.uranusjr.com" target="_blank" rel="external">like this</a> <code>[like this][]</code>, then on it’s own line anywhere else in the file:</p>
+<p><code>[like this]: http://macdown.uranusjr.com</code></p>
+<p>### Images</p>
+<p>#### Inline</p>
+<p><code>![Alt Image Text](path/or/url/to.jpg &quot;Optional Title&quot;)</code></p>
+<p>#### Reference style</p>
+<p><code>![Alt Image Text][image-id]</code></p>
+<p>on it’s own line elsewhere:</p>
+<p><code>[image-id]: path/or/url/to.jpg &quot;Optional Title&quot;</code></p>
+<p>### Lists</p>
+<p>* Lists must be preceded by a blank line (or block element)</p>
+<p>* Unordered lists start each item with a <code>\*</code></p>
+<ul>
+<li><p><code>-</code> works too</p>
+<p>* Indent a level to make a nested list</p>
+<p>1. Ordered lists are supported.</p>
+<p>2. Start each item (number-period-space) like <code>1\.</code></p>
+<p>42. It doesn’t matter what number you use, I will render them sequentially</p>
+<p>1. So you might want to start each line with <code>1.</code> and let me sort it out</p>
+</li>
+</ul>
+<p>Here is the code:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">\* Lists must be preceded by a blank line (or block element)</div><div class="line"></div><div class="line">\* Unordered lists start each item with a `\*`</div><div class="line"></div><div class="line">- `-` works too</div><div class="line"></div><div class="line"> \* Indent a level to make a nested list</div><div class="line"></div><div class="line"> 1\. Ordered lists are supported.</div><div class="line"></div><div class="line"> 2\. Start each item (number-period-space) like `1\. `</div><div class="line"></div><div class="line"> 42\. It doesn&apos;t matter what number you use, I will render them sequentially</div><div class="line"></div><div class="line"> 1\. So you might want to start each line with `1.` and let me sort it out</div></pre></td></tr></table></figure>
+<p>### Block Quote</p>
+<p>> Angle brackets <code>\&gt;</code> are used for block quotes.</p>
+<p>Technically not every line needs to start with a <code>\&gt;</code> as long as</p>
+<p>there are no empty lines between paragraphs.</p>
+<p>> Looks kinda ugly though.</p>
+<p>> > Block quotes can be nested.</p>
+<p>> > > Multiple Levels</p>
+<p>></p>
+<p>> Most markdown syntaxes work inside block quotes.</p>
+<p>></p>
+<p>> * Lists</p>
+<p>> * <a href="http://macdown.uranusjr.com" title="Title" target="_blank" rel="external">Links</a></p>
+<p>> * Etc.</p>
+<p>Here is the code:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">\&gt; Angle brackets `\&gt;` are used for block quotes.</div><div class="line"></div><div class="line">Technically not every line needs to start with a `\&gt;` as long as</div><div class="line"></div><div class="line">there are no empty lines between paragraphs.</div><div class="line"></div><div class="line">\&gt; Looks kinda ugly though.</div><div class="line"></div><div class="line">\&gt; \&gt; Block quotes can be nested.</div><div class="line"></div><div class="line">\&gt; \&gt; \&gt; Multiple Levels</div><div class="line"></div><div class="line">\&gt;</div><div class="line"></div><div class="line">\&gt; Most markdown syntaxes work inside block quotes.</div><div class="line"></div><div class="line">\&gt;</div><div class="line"></div><div class="line">\&gt; \* Lists</div><div class="line"></div><div class="line">\&gt; \* [Links][arbitrary\_id]</div><div class="line"></div><div class="line">\&gt; \* Etc.</div></pre></td></tr></table></figure>
+<p>### Inline Code</p>
+<p><code>Inline code</code> is indicated by surrounding it with backticks:</p>
+<p><code>`Inline code` </code></p>
+<p>If your <code>code has `backticks` </code> that need to be displayed, you can use double backticks:</p>
+<figure class="highlight plain"><figcaption><span>``Code with `backticks` `` ```` (mind the spaces preceding the final set of backticks)</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">\#\#\# Block Code</div><div class="line"></div><div class="line">If you indent at least four spaces or one tab, I&apos;ll display a code block.</div><div class="line"></div><div class="line"> print(&apos;This is a code block&apos;)</div><div class="line"></div><div class="line"> print(&apos;The block must be preceded by a blank line&apos;)</div><div class="line"></div><div class="line"> print(&apos;Then indent at least 4 spaces or 1 tab&apos;)</div><div class="line"></div><div class="line"> print(&apos;Nesting does nothing. Your code is displayed Literally&apos;)</div><div class="line"></div><div class="line">I also know how to do something called [Fenced Code Blocks](\#fenced-code-block) which I will tell you about later.</div><div class="line"></div><div class="line">\#\#\# Horizontal Rules</div><div class="line"></div><div class="line">If you type three asterisks `\*\*\*` or three dashes `---` on a line, I&apos;ll display a horizontal rule:</div><div class="line"></div><div class="line">\*\*\*</div><div class="line"></div><div class="line">\#\# \&lt;a name=&quot;markdown-pane&quot;\&gt;\&lt;/a\&gt;The Markdown Preference Pane</div><div class="line"></div><div class="line">This is where I keep all preferences related to how I parse markdown into html.</div><div class="line"></div><div class="line">![Markdown preferences pane](http://d.pr/i/RQEi+)</div><div class="line"></div><div class="line">\#\#\# Document Formatting</div><div class="line"></div><div class="line">The \*\*\*Smartypants\*\*\* extension automatically transforms straight quotes (`&quot;` and `&apos;`) in your text into typographer’s quotes (`“`, `”`, `‘`, and `’`) according to the context. Very useful if you’re a typography freak like I am. Quote and Smartypants are syntactically incompatible. If both are enabled, Quote takes precedence.</div><div class="line"></div><div class="line">\#\#\# Block Formatting</div><div class="line"></div><div class="line">\#\#\#\# Table</div><div class="line"></div><div class="line">This is a table:</div><div class="line"></div><div class="line">First Header | Second Header</div><div class="line"></div><div class="line">------------- | -------------</div><div class="line"></div><div class="line">Content Cell | Content Cell</div><div class="line"></div><div class="line">Content Cell | Content Cell</div><div class="line"></div><div class="line">You can align cell contents with syntax like this:</div><div class="line"></div><div class="line">| Left Aligned | Center Aligned | Right Aligned |</div><div class="line"></div><div class="line">|:------------- |:---------------:| -------------:|</div><div class="line"></div><div class="line">| col 3 is | some wordy text | $1600 |</div><div class="line"></div><div class="line">| col 2 is | centered | $12 |</div><div class="line"></div><div class="line">| zebra stripes | are neat | $1 |</div><div class="line"></div><div class="line">The left- and right-most pipes (`|`) are only aesthetic, and can be omitted. The spaces don’t matter, either. Alignment depends solely on `:` marks.</div><div class="line"></div><div class="line">\#\#\#\# \&lt;a name=&quot;fenced-code-block&quot;\&gt;Fenced Code Block\&lt;/a\&gt;</div><div class="line"></div><div class="line">This is a fenced code block:</div></pre></td></tr></table></figure>
+<p>print (‘Hello world!)’</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">You can also use waves (`~`) instead of back ticks (`` ` ``):</div><div class="line"></div><div class="line">~~~</div><div class="line"></div><div class="line">print(&apos;Hello world!&apos;)</div><div class="line"></div><div class="line">~~~</div><div class="line"></div><div class="line">You can add an optional language ID at the end of the first line. The language ID will only be used to highlight the code inside if you tick the \*\*\*Enable highlighting in code blocks\*\*\* option. This is what happens if you enable it:</div><div class="line"></div><div class="line">![Syntax highlighting example](http://d.pr/i/9HM6+)</div><div class="line"></div><div class="line">I support many popular languages as well as some generic syntax descriptions that can be used if your language of choice is not supported. See [relevant sections on the official site](http://macdown.uranusjr.com/features/) for a full list of supported syntaxes.</div><div class="line"></div><div class="line">\#\#\# Inline Formatting</div><div class="line"></div><div class="line">The following is a list of optional inline markups supported:</div><div class="line"></div><div class="line">Option name | Markup | Result if enabled |</div><div class="line"></div><div class="line">--------------------|------------------|-----------------------|</div><div class="line"></div><div class="line">Intra-word emphasis | So A\\\*maz\\\*ing | So A\&lt;em\&gt;maz\&lt;/em\&gt;ing |</div><div class="line"></div><div class="line">Strikethrough | \\~~Much wow\\~~ | \&lt;del\&gt;Much wow\&lt;/del\&gt; |</div><div class="line"></div><div class="line">Underline [^under] | \\\_So doge\\\_ | \&lt;u\&gt;So doge\&lt;/u\&gt; |</div><div class="line"></div><div class="line">Quote [^quote] | \\&quot;Such editor\\&quot; | \&lt;q\&gt;Such editor\&lt;/q\&gt; |</div><div class="line"></div><div class="line">Highlight | \\==So good\\== | \&lt;mark\&gt;So good\&lt;/mark\&gt; |</div><div class="line"></div><div class="line">Superscript | hoge\\^(fuga) | hoge\&lt;sup\&gt;fuga\&lt;/sup\&gt; |</div><div class="line"></div><div class="line">Autolink | http://t.co | \&lt;http://t.co\&gt; |</div><div class="line"></div><div class="line">Footnotes | [\\^4] and [\\^4]: | [^4] and footnote 4 |</div><div class="line"></div><div class="line">[^4]: You don&apos;t have to use a number. Arbitrary things like `[^footy note4]` and `[^footy note4]:` will also work. But they will \*render\* as numbered footnotes. Also, no need to keep your footnotes in order, I will sort out the order for you so they appear in the same order they were referenced in the text body. You can even keep some footnotes near where you referenced them, and collect others at the bottom of the file in the traditional place for footnotes.</div><div class="line"></div><div class="line">\#\# \&lt;a name=&quot;rendering-pane&quot;\&gt;\&lt;/a\&gt;The Rendering Preference Pane</div><div class="line"></div><div class="line">This is where I keep preferences relating to how I render and style the parsed markdown in the preview window.</div><div class="line"></div><div class="line">![Rendering preferences pane](http://d.pr/i/rT4d+)</div><div class="line"></div><div class="line">\#\#\# CSS</div><div class="line"></div><div class="line">You can choose different css files for me to use to render your html. You can even customize or add your own custom css files.</div><div class="line"></div><div class="line">\#\#\# Syntax Highlighting</div><div class="line"></div><div class="line">You have already seen how I can syntax highlight your fenced code blocks. See the [Fenced Code Block](\#fenced-code-block) section if you haven’t! You can also choose different themes for syntax highlighting.</div><div class="line"></div><div class="line">\#\#\# TeX-like Math Syntax</div><div class="line"></div><div class="line">I can also render TeX-like math syntaxes, if you allow me to.[^math] I can do inline math like this: \\\\( 1 + 1 \\\\) or this (in MathML): \&lt;math\&gt;\&lt;mn\&gt;1\&lt;/mn\&gt;\&lt;mo\&gt;+\&lt;/mo\&gt;\&lt;mn\&gt;1\&lt;/mn\&gt;\&lt;/math\&gt;, and block math:</div><div class="line"></div><div class="line">\\\\[</div><div class="line"></div><div class="line"> A^T\_S = B</div><div class="line"></div><div class="line">\\\\]</div><div class="line"></div><div class="line">or (in MathML)</div><div class="line"></div><div class="line">\&lt;math display=&quot;block&quot;\&gt;</div><div class="line"></div><div class="line"> \&lt;msubsup\&gt;\&lt;mi\&gt;A\&lt;/mi\&gt; \&lt;mi\&gt;S\&lt;/mi\&gt; \&lt;mi\&gt;T\&lt;/mi\&gt;\&lt;/msubsup\&gt;</div><div class="line"></div><div class="line"> \&lt;mo\&gt;=\&lt;/mo\&gt;</div><div class="line"></div><div class="line"> \&lt;mi\&gt;B\&lt;/mi\&gt;</div><div class="line"></div><div class="line">\&lt;/math\&gt;</div><div class="line"></div><div class="line">\#\#\# Task List Syntax</div><div class="line"></div><div class="line">1\. [x] I can render checkbox list syntax</div><div class="line"></div><div class="line"> \* [x] I support nesting</div><div class="line"></div><div class="line"> \* [x] I support ordered \*and\* unordered lists</div><div class="line"></div><div class="line">2\. [ ] I don&apos;t support clicking checkboxes directly in the html window</div><div class="line"></div><div class="line">\#\#\# Jekyll front-matter</div><div class="line"></div><div class="line">If you like, I can display Jekyll front-matter in a nice table. Just make sure you put the front-matter at the very beginning of the file, and fence it with `---`. For example:</div></pre></td></tr></table></figure>
+<hr>
+<p>title: “Macdown is my friend”</p>
+<p>date: 2014-06-06 20:00:00</p>
+<hr>
+<p>```</p>
+<p>### Render newline literally</p>
+<p>Normally I require you to put two spaces and a newline (aka return) at the end of a line in order to create a line break. If you like, I can render a newline any time you end a line with a newline. However, if you enable this, markdown that looks lovely when I render it might look pretty funky when you let some *other* program render it.</p>
+<p>## \<a name="general-pane" \="">\The General Preferences Pane</a></p>
+<p>This is where I keep preferences related to application behavior.</p>
+<p><img src="http://d.pr/i/rvwu+" alt="General preferences pane"></p>
+<p>The General Preferences Pane allows you to tell me how you want me to behave. For example, do you want me to make sure there is a document open when I launch? You can also tell me if I should constantly update the preview window as you type, or wait for you to hit <code>command-R</code> instead. Maybe you prefer your editor window on the right? Or to see the word-count as you type. This is also the place to tell me if you are interested in pre-releases of me, or just want to stick to better-tested official releases.</p>
+<p>## \<a name="editor-pane" \="">\The Editor Preference Pane</a></p>
+<p>This is where I keep preferences related to the behavior and styling of the editing window.</p>
+<p><img src="http://d.pr/i/6OL5+" alt="Editor preferences pane"></p>
+<p>### Styling</p>
+<p>My editor provides syntax highlighting. You can edit the base font and the coloring/sizing theme. I provided some default themes (courtesy of <a href="http://mouapp.com" target="_blank" rel="external">Mou</a>’s creator, Chen Luo) if you don’t know where to start.</p>
+<p>You can also edit, or even add new themes if you want to! Just click the ***Reveal*** button, and start moving things around. Remember to use the correct file extension (<code>.styles</code>), though. I’m picky about that.</p>
+<p>I offer auto-completion and other functions to ease your editing experience. If you don’t like it, however, you can turn them off.</p>
+<p>## Hack On</p>
+<p>That’s about it. Thanks for listening. I’ll be quiet from now on (unless there’s an update about the app—I’ll remind you for that!).</p>
+<p>Happy writing!</p>
+<p>[^emphasize]: If **Underlines** is turned on, <code>\_this notation\_</code> will render as underlined instead of emphasized</p>
+<p>[^under]: If **Underline** is disabled <code>\_this\_</code> will be rendered as *emphasized* instead of being underlined.</p>
+<p>[^quote]: **Quote** replaces literal <code>&quot;</code> characters with html <code>\&lt;q\&gt;</code> tags. **Quote** and **Smartypants** are syntactically incompatible. If both are enabled, **Quote** takes precedence. Note that **Quote** is different from *blockquote*, which is part of standard Markdown.</p>
+<p>[^math]: Internet connection required.</p>
+]]></content>
+      
+        <categories>
+            
+            <category> other </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> markdown </tag>
+            
+            <tag> macdown </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[git常用命令]]></title>
+      <url>/2016/08/26/git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+      <content type="html"><![CDATA[<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="下载客户端"><a href="#下载客户端" class="headerlink" title="下载客户端"></a>下载客户端</h2><pre><code>https://help.github.com/articles/set-up-git
+windows 下需要安装 Git Bash命令行工具 安装完后操作同 linux
+</code></pre><h2 id="配置git"><a href="#配置git" class="headerlink" title="配置git"></a>配置git</h2><pre><code>$ git config --global user.name &quot;tangyao&quot;
+$ git config --global user.email &quot;tangyao@taobao.com&quot;
+** 查看设置情况 **
+$ git config --get user.name
+$ git config --get user.email
+</code></pre><h2 id="建立ssh链接"><a href="#建立ssh链接" class="headerlink" title="建立ssh链接"></a>建立ssh链接</h2><pre><code>创建 sshkey用于连接服务器的时候认证
+$ cd .ssh
+    保证. ssh目录下名称为id_rsa, id_rsa.pub的文件是唯一的，如果已经存在的话先备份一下。
+$ mkdir back_rsa
+$ cp id_rsa* back_rsa
+$ rm id_rsa*
+$ ssh-keygen -t rsa -C &quot;tangyao@taobao.com&quot;
+复制id_rsa.pub中的内容添加到 github中
+登陆 github系统。点击右上角的 Account Settings---&gt;SSH Public keys ---&gt; add another public keys
+把你本地生成的密钥复制到里面（key文本框中）， 点击 add key 就ok了
+测试是否连接成功
+复制的key里面带空行的样子 （vi取到的可能有问题）
+$ ssh﻿ git@github.com
+echo: Hi coolme200/top! You&apos;ve successfully authenticated, but GitHub does not provide shell access.
+</code></pre><h1 id="建立git项目"><a href="#建立git项目" class="headerlink" title="建立git项目"></a>建立git项目</h1><h2 id="创建工作目录"><a href="#创建工作目录" class="headerlink" title="创建工作目录"></a>创建工作目录</h2><pre><code>$ mkdir helloworld
+$ cd helloworld (到workspace的项目目录下执行)
+</code></pre><h2 id="初始化，否则这不会被认为是一个-git项目"><a href="#初始化，否则这不会被认为是一个-git项目" class="headerlink" title="初始化，否则这不会被认为是一个 git项目"></a>初始化，否则这不会被认为是一个 git项目</h2><pre><code>$ git init
+</code></pre><h2 id="设置项目远程版本库地址"><a href="#设置项目远程版本库地址" class="headerlink" title="设置项目远程版本库地址"></a>设置项目远程版本库地址</h2><pre><code>例1（适用 github）
+$ git remote add origin http://github.com/coolme200/hello
+    例2（适用 gitlab）
+$ git remote add origin git@gitlab.taobao.ali.com:varworld.git
+    错误提示：
+    fatal: remote origin already exists.
+    解决办法：
+$ git remote rm origin
+注意
+    1、先输入 $ git remote rm origin
+    2、再输入 $ git remote add origin git@github.com:djqiang/gitdemo.git 就不会报错了！
+    3、如果输入 $ git remote rm origin 还是报错的话，error: Could not remove config section &apos;remote.origin&apos;.     我们需要修改gitconfig文件的内容
+    4、找到你的github的安装路径，我的是C:\Users\ASUS\AppData\Local\GitHub\PortableGit_ca477551eeb4aea0e4ae9fcd3358bd96720bb5    c8\etc
+    5、找到一个名为gitconfig的文件，打开它把里面的[remote &quot;origin&quot;]那一行删掉就好了！
+</code></pre><h2 id="获取代码"><a href="#获取代码" class="headerlink" title="获取代码"></a>获取代码</h2><pre><code>$ git pull origin master
+</code></pre><h2 id="修改代码"><a href="#修改代码" class="headerlink" title="修改代码"></a>修改代码</h2><pre><code>$ git add test.js
+</code></pre><h2 id="提交代码至本地版本库"><a href="#提交代码至本地版本库" class="headerlink" title="提交代码至本地版本库"></a>提交代码至本地版本库</h2><pre><code>$ git commit -m &apos;commit&apos;
+</code></pre><h2 id="提交到服务器"><a href="#提交到服务器" class="headerlink" title="提交到服务器"></a>提交到服务器</h2><h3 id="提交到master分支"><a href="#提交到master分支" class="headerlink" title="提交到master分支"></a>提交到master分支</h3><pre><code>$ git push origin master
+    错误提示：
+    error: failed to push som refs to ........
+    解决办法,先pull 下来 再push 上去
+$ git pull origin master
+ ex:1
+$ git push origin  default to pushing only the current branch to &lt;code&gt; origin &lt;/code&gt; use &lt;code&gt; git config remote.origin.push HEAD &lt;/code&gt;.
+</code></pre><h3 id="创建新的分支、推送修改到new1分支"><a href="#创建新的分支、推送修改到new1分支" class="headerlink" title="创建新的分支、推送修改到new1分支"></a>创建新的分支、推送修改到new1分支</h3><pre><code>$ git push origin new1
+</code></pre><h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="查看提交日志信息"><a href="#查看提交日志信息" class="headerlink" title="查看提交日志信息"></a>查看提交日志信息</h2><pre><code>git log --查看版本信息
+</code></pre><h2 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h2><pre><code>git rm 文件  --恢复
+</code></pre><h2 id="branch"><a href="#branch" class="headerlink" title="branch"></a>branch</h2><pre><code>git branch bugFix --新建分支bugFix
+git branch -d new1 删除分支
+git push origin :new1 删除服务器分支
+</code></pre><h2 id="checkout"><a href="#checkout" class="headerlink" title="checkout"></a>checkout</h2><pre><code>git checkout bugFix --切换到bugFix分支
+git checkout -b bugFix --新建并切换分支bugFix
+git checkout master^ -- HEAD向前移动一次
+git checkout master~3 -- HEAD向前移动3个未知
+git checkout -f master HEAD~4 将master指向当前的前4个版本
+</code></pre><h2 id="合并分支："><a href="#合并分支：" class="headerlink" title="合并分支："></a>合并分支：</h2><pre><code>git merge bugFix --将bugFix合并到当前分钟
+git rebase master -- 将当前分支合并到master分支上
+git cherry-pick C2 C4 -- 将 C2 和 C4下的提交记录，抓过来放到当前分支下
+git rebase -i HEAD4 移动分支的提交顺序（可删除提交）
+
+合并工具：
+git mergetool --tool=emerge
+命令 f a b n p
+https://www.gnu.org/software/emacs/manual/html_node/emacs/Merge-Commands.html#Merge-Commands
+</code></pre><h2 id="拉取远程分支-fetch"><a href="#拉取远程分支-fetch" class="headerlink" title="拉取远程分支 fetch"></a>拉取远程分支 fetch</h2><pre><code>git fetch origin master
+    显示分支列表，包括远程。
+git branch -a
+git fetch -p origin
+    创建分支new1
+</code></pre><h2 id="撤销提交："><a href="#撤销提交：" class="headerlink" title="撤销提交："></a>撤销提交：</h2><pre><code>git reset --hard 版本号  --直接撤销提交
+git revert HEAD  --生产一个新的版本，撤销到之前版本
+
+git log --graph --pretty=online --abbrev-commit  (查看合并的动作)
+</code></pre><h2 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h2><pre><code>git stash 暂存目录
+git stash pop  恢复目录
+</code></pre><h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><pre><code>git reflog show  查看所有引用
+git show HEAD@{0}
+</code></pre><h2 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h2><pre><code>Git status
+
+git show 版本号  查看版本信息
+</code></pre><h2 id="clean"><a href="#clean" class="headerlink" title="clean"></a>clean</h2><pre><code>删除 untracked files
+git clean -f
+
+# 连 untracked 的目录也一起删掉
+git clean -fd
+
+# 连 gitignore 的untrack 文件/目录也一起删掉 （慎用，一般这个是用来删掉编译出来的 .o之类的文件用的）
+git clean -xfd
+
+# 在用上述 git clean 前，墙裂建议加上 -n 参数来先看看会删掉哪些文件，防止重要文件被误删
+git clean -nxfd
+git clean -nf
+git clean -nfd
+</code></pre><h2 id="diff"><a href="#diff" class="headerlink" title="diff"></a>diff</h2><pre><code>git diff 查看目录、索引、HEAD的差异
+</code></pre><h1 id="注"><a href="#注" class="headerlink" title="注"></a>注</h1><pre><code>mac git 工具 Sourcetree git代码比较工具
+</code></pre><h1 id="git仓库超前的情况"><a href="#git仓库超前的情况" class="headerlink" title="git仓库超前的情况"></a>git仓库超前的情况</h1><pre><code>git fetch origin
+git merge origin master
+git pull origin master过程中出现一下错误
+(fatal: refusing to merge unrelated histories)[http://blog.csdn.net/lindexi_gd/article/details/52554159]:使用git pull origin master --allow-unrelated-histories
+
+(Dealing with non-fast-forward errors)[https://help.github.com/articles/dealing-with-non-fast-forward-errors/]
+</code></pre><p><strong>参考链接：</strong><br><a href="https://git-scm.com/docs" target="_blank" rel="external">git</a></p>
+<p><a href="https://tianqing370687.github.io/2016/08/29/git-%E5%A6%82%E4%BD%95%E5%9C%A8%E5%90%8C%E4%B8%80%E5%8F%B0%E7%94%B5%E8%84%91%E9%85%8D%E7%BD%AE%E5%A4%9A%E4%B8%AAgit%E6%88%96%E8%80%85github%E8%B4%A6%E5%8F%B7/" target="_blank" rel="external">如何在同一台电脑配置多个git或者github账号</a></p>
+<p><a href="https://cnbin.github.io/blog/2015/06/19/git-config-ming-ling-cha-kan-pei-zhi-wen-jian/" target="_blank" rel="external">Git Config 命令查看配置文件</a></p>
+<p><strong>推荐一个git学习的网站，非常形象的模拟了git的命令：</strong><a href="http://learngitbranching.js.org/" target="_blank" rel="external">http://learngitbranching.js.org/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> other </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> git </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[数据系统架构之Lambda architecture]]></title>
+      <url>/2016/06/28/%E6%95%B0%E6%8D%AE%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E4%B9%8BLambda%20architecture/</url>
+      <content type="html"><![CDATA[<h1 id="传统系统的问题"><a href="#传统系统的问题" class="headerlink" title="传统系统的问题"></a>传统系统的问题</h1><p>“我们正在从IT时代走向DT时代(数据时代)。IT和DT之间，不仅仅是技术的变革，更是思想意识的变革，IT主要是为自我服务，用来更好地自我控制和管理，DT则是激活生产力，让别人活得比你好”——阿里巴巴董事局主席马云。</p>
+<p>数据量从M的级别到G的级别到现在T的级、P的级别。数据量的变化，数据管理系统（DBMS）和数仓系统（DW）也在悄然的变化着。<br>传统应用的数据系统架构设计时，应用直接访问数据库系统。当用户访问量增加时，数据库无法支撑日益增长的用户请求的负载时，从而导致数据库服务器无法及时响应用户请求，出现超时的错误。出现这种情况以后，在系统架构上就采用图（A）的架构，在数据库和应用中间过一层缓冲隔离，缓解数据库的读写压力。<br><img src="/images/数据系统架构之Lambda architecture/graph1.png" class="full-image" title="图（A）"><br>然而，当用户访问量持续增加时，就需要考虑读写分离技术（Master－Slave）架构如图（B），分库分表技术。现在，架构变得越来越复杂了，增加队列、分区、复制等处理逻辑。应用程序需要了解数据库的schema，才能访问到正确的数据。<br><img src="/images/数据系统架构之Lambda architecture/graph2.png" class="full-image" title="图（B）"> </p>
+<h1 id="Lambda架构的背景"><a href="#Lambda架构的背景" class="headerlink" title="Lambda架构的背景"></a>Lambda架构的背景</h1><p>大数据处理技术需要解决这种可伸缩性与复杂性。<br>首先要认识到这种分布式的本质，要很好地处理分区与复制，不会导致错误分区引起查询失败，而是要将这些逻辑内化到数据库中。当需要扩展系统时，可以非常方便地增加节点，系统也能够针对新节点进行rebalance。<br>其次是要让数据成为不可变的。原始数据永远都不能被修改，这样即使犯了错误，写了错误数据，原来好的数据并不会受到破坏。<br>Storm的作者Nathan Marz提出的一个实时大数据处理框架（Lambda架构）就满足以上两点。Marz在Twitter工作期间开发了著名的实时大数据处理框架Storm，Lambda架构是其根据多年进行分布式大数据系统的经验总结提炼而成。<br>Lambda架构的目标是设计出一个能满足实时大数据系统关键特性的架构，包括有：高容错、低延时和可扩展等。Lambda架构整合离线计算和实时计算，融合不可变性（Immunability），读写分离和复杂性隔离等一系列架构原则，可集成Hadoop，Kafka，Storm，Spark，Hbase等各类大数据组件。</p>
+<h1 id="大数据系统的关键特性"><a href="#大数据系统的关键特性" class="headerlink" title="大数据系统的关键特性"></a>大数据系统的关键特性</h1><p>Marz介绍Big Data System许具备的属性：<br>a、Robust and fault-tolerant（容错性和鲁棒性）：对大规模分布式系统来说，机器是不可靠的，可能会当机，但是系统需要是健壮、行为正确的，即使是遇到机器错误。除了机器错误，人更可能会犯错误。在软件开发中难免会有一些Bug，系统必须对有Bug的程序写入的错误数据有足够的适应能力，所以比机器容错性更加重要的容错性是人为操作容错性。对于大规模的分布式系统来说，人和机器的错误每天都可能会发生，如何应对人和机器的错误，让系统能够从错误中快速恢复尤其重要。<br>b、Low latency reads and updates（低延时）：很多应用对于读和写操作的延时要求非常高，要求对更新和查询的响应是低延时的。<br>c、Scalable（横向扩容）：当数据量/负载增大时，可扩展性的系统通过增加更多的机器资源来维持性能。也就是常说的系统需要线性可扩展，通常采用scale out（通过增加机器的个数）而不是scale up（通过增强机器的性能）。<br>d、General（通用性）：系统需要能够适应广泛的应用，包括金融领域、社交网络、电子商务数据分析等。<br>e、Extensible（可扩展）：需要增加新功能、新特性时，可扩展的系统能以最小的开发代价来增加新功能。<br>f、Allows ad hoc queries（方便查询）：数据中蕴含有价值，需要能够方便、快速的查询出所需要的数据。<br>d、Minimal maintenance（易于维护）：系统要想做到易于维护，其关键是控制其复杂性，越是复杂的系统越容易出错、越难维护。<br>h、Debuggable（易调试）：当出问题时，系统需要有足够的信息来调试错误，找到问题的根源。其关键是能够追根溯源到每个数据生成点。</p>
+<h1 id="数据系统的本质"><a href="#数据系统的本质" class="headerlink" title="数据系统的本质"></a>数据系统的本质</h1><p>Marz认为：数据系统通过查询过去的（部分、全部）数据去回答问题。如：他是一个什么样的人？他有多少朋友？这个账号是否收支平衡？。因此，Data System的通用定义为：<br>Query ＝ Function（all data）。<br>对通用的表达式进行分解得到：<br>数据系统 ＝ 数据 ＋ 查询<br>从而可以从数据和查询两个方面认识大数据系统的本质。</p>
+<h2 id="数据本本质：When-amp-What"><a href="#数据本本质：When-amp-What" class="headerlink" title="数据本本质：When&amp;What"></a>数据本本质：When&amp;What</h2><p>数据是一个不可分割的单元，数据有两个关键的特性：When 和 What。<br>When是只数据是与时间相关的，也就是数据是在某个时间产生的。这个非常重要，在具有事务特性的数据库中，操作的先后顺序对结果至关重要。例如数据库的Binlog日志。因此，数据的时间性质决定了数据的全局发生先后，也就决定了数据的结果。<br>What是只数据的本身。由于数据跟某个时间点相关，所以数据的本身是不可变的(immutable)，过往的数据已经成为事实（Fact），你不可能回到过去的某个时间点去改变数据事实。这也就意味着对数据的操作其实只有两种：读取已存在的数据和添加更多的新数据。采用数据库的记法，CRUD就变成了CR，Update和Delete本质上其实是新产生的数据信息，用C来记录。</p>
+<h2 id="数据的存储：Store-Everything-Rawly-and-Immutably"><a href="#数据的存储：Store-Everything-Rawly-and-Immutably" class="headerlink" title="数据的存储：Store Everything Rawly and Immutably"></a>数据的存储：Store Everything Rawly and Immutably</h2><p>根据上述对数据特性的分析，lambda架构中对数据的存储采用的方式是：数据不可变，存储所有数据。<br>采用这两种方式存储的好处：<br>a、简单。采用不可变的数据模型，存储数据时只需要简单的往主数据集后追加数据即可。相比于采用可变的数据模型，为了Update操作，数据通常需要被索引，从而能快速找到要更新的数据去做更新操作。<br>b、应对人为和机器的错误。人和机器每天都可能会出错，如何应对人和机器的错误，让数据系统快速恢复极其重要。不可变和可重复计算是应对认为和机器错误的常用方法。采用可变数据模型，引发错误的数据有可能被覆盖而丢失。相比于采用不可变的数据模型，因为所有的数据都在，引发错误的数据也在。修复的方法就可以简单的是遍历数据集上存储的所有的数据，丢弃错误的数据，重新计算得到Views。重新计算的关键点在于利用数据的时间特性决定的全局次序，依次顺序重新执行，必然能得到正确的结果。<br>当前业界有很多采用不可变数据模型来存储所有数据的例子。比如分布式数据库Datomic，基于不可变数据模型来存储数据，从而简化了设计。分布式消息中间件Kafka，基于Log日志，以追加append-only的方式来存储消息。</p>
+<h1 id="Lambda架构"><a href="#Lambda架构" class="headerlink" title="Lambda架构"></a>Lambda架构</h1><p>Lambda架构的主要思想是将大数据系统架构为多层个层次，分别为批处理层（batch layer）、实时处理层（speed layer）、服务层（serving layer）如图（C）。<br>理想状态下，任何数据访问都可以从表达式Query = function(all data)开始，但是，若数据达到相当大的一个级别（例如PB），且还需要支持实时查询时，就需要耗费非常庞大的资源。一个解决方式是预运算查询函数（precomputed query funciton）。书中将这种预运算查询函数称之为Batch View（A），这样当需要执行查询时，可以从Batch View中读取结果。这样一个预先运算好的View是可以建立索引的，因而可以支持随机读取（B）。于是系统就变成：<br>（A）batch view = function(all data)；<br>（B）query = function(batch view)。</p>
+<img src="/images/数据系统架构之Lambda architecture/graph3.png" class="full-image" title="图（B）"> 
+<h2 id="Batch-Layer"><a href="#Batch-Layer" class="headerlink" title="Batch Layer"></a>Batch Layer</h2><p>在Lambda架构中，实现（A）batch view = function(all data)的部分称之为Batch Layer。他承担两个职责：<br>a、存储Master Dataset，这是一个不变的持续增长的数据集<br>b、针对这个Master Dataset进行预运算<br>在全体数据集上在线运行查询函数得到结果的代价太大，同时处理查询时间过长，导致用户体验不好。如果我们预先在数据集上计算并保存预计算的结果，查询的时候直接返回预计算的结果，而无需重新进行复制耗时的计算。显然，batch view 是一个批处理过程，如采用Hadoop或spark支持的map－reduce方式。采用这种方式计算得到的每个view都支持再次计算，且每次计算的结果都相同。</p>
+<img src="/images/数据系统架构之Lambda architecture/graph4.png" class="full-image" title="图（D）"> 
+<p>对View的理解：<br>View是一个和业务关联性比较大的概念，View的创建需要从业务自身的需求出发。一个通用的数据库查询系统，查询对应的函数千变万化，不可能穷举。但是如果从业务自身的需求出发，可以发现业务所需要的查询常常是有限的。Batch Layer需要做的一件重要的工作就是根据业务的需求，考察可能需要的各种查询，根据查询定义其在数据集上对应的Views。<br>Batch Layer的Immutable data模型和Views<br>如图（E）坐席（agentid＝50023）的人，在10:00:06分的时候，状态是calling，在10:00:10的时候状态为waiting。在传统的数据库设计中，直接后面的纪录覆盖前面的纪录，而在Immutable 数据模型中，不会对原有数据进行更改，而是采用插入修改纪录的形式更改历史纪录。</p>
+<img src="/images/数据系统架构之Lambda architecture/graph5.png" class="full-image" title="图（E）">
+<p>上文所提及的View是图（E）中预先计算得到的相关视图，例如：2016-06-21当天所有上线的agent数，每条热线、公司下上线的Agent数。根据业务需要，预先计算出结果。此过程相当于传统数仓建模的应用层，应用层也是根据业务场景，预先加工出的view。<br>Speed Layer</p>
+<p>Batch Layer能够很好的处理离线数据，但是在很多场景数据不断产生，并且业务场景需要实时查询。Speed Layer就是设计用来处理增量实时数据。<br>Speed Layer和Batch Layer比较类似，对数据进行计算并生成Realtime View，其主要的区别在于：<br>a、Speed Layer处理的数据是最近的增量数据流，Batch Layer处理的是全体数据集<br>b、Speed Layer为了效率，接收到新数据及时更新Realtime View，而Batch Layer根据全体离线数据直接得到Batch View。Speed Layer是一种增量计算，而非重新计算（recomputation）。<br>c、Speed Layer因为采用增量计算，所以延迟小，而Batch Layer是全数据集的计算，耗时比较长。<br>综上所诉，Speed Layer是Batch Layer在实时性上的一个补充。如图（F）</p>
+<img src="/images/数据系统架构之Lambda architecture/graph6.png" class="full-image" title="图（F）">
+<p>Speed Layer可总结为以（C）Realtime View ＝ function（Realtime View， new data）；<br>Lambda Architecture将数据处理分解为Batch Layer 和Speed Layer有如下优点：<br>a、容错性：Speed Layer中处理的数据不断写入Batch Layer，当Batch Layer中重新计算数据集包含Speed Layer处理的数据集后，当前的Realtime View就可以丢弃，这就意味着Speed Layer处理中引入的错误，在Batch Layer重新计算时都可以得到修证。这点也可以看成时CAP理论中的最终一致性（Eventual Consistency）的体现。<br>b、复杂性隔离。Batch Layer处理的是离线数据，可以很好的掌控。Speed Layer采用增量算法处理实时数据，复杂性比Batch Layer要高很多。通过分开Batch Layer和Speed Layer，把复杂性隔离到Speed Layer，可以很好的提高整个系统的鲁棒性和可靠性。<br>Serving Layer</p>
+<p>Batch Layer通过对Master Dataset执行查询获得Batch View，Speed Layer通过增量计算提供Realtime View。Lambda架构的Serving Layer用于响应用户的查询请求，合并Batch View和Realtime View中的结果数据集到最终的数据集，如图（G）。因此，Serving Layer的职责包含：<br>a、对batch View和RealTime View的随机访问<br>b、更新Batch Veiw和RealTime View，并负责结合两者的数据，对用户提供统一的接口</p>
+<img src="/images/数据系统架构之Lambda architecture/graph7.png" class="full-image" title="图（G）"> 
+<p>综上所诉，Serving Layer采用如下等式（D）表示：Query ＝ function（Batch Views， Realtime View）。<br>Lambda 架构组件选型</p>
+<p>下图给出了Lambda架构中各组件在大数据生态系统中和阿里集团的常用组件。数据流存储选用不可变日志的分布式系统Kafa、TT、Metaq；Batch Layer数据集的存储选用Hadoop的HDFS或者阿里云的ODPS；Batch View的加工采用MapReduce；Batch View数据的存储采用Mysql（查询少量的最近结果数据）、Hbase（查询大量的历史结果数据）。Speed Layer采用增量数据处理Storm、Flink；Realtime View增量结果数据集采用内存数据库Redis。</p>
+<img src="/images/数据系统架构之Lambda architecture/graph8.png" class="full-image" title="图（H）"> 
+<p>Lambda是一个通用框架，各模块选型不要局限于上面给出的组件，特别是view的选型。因为View是和各业务关联非常大的概念，View选择组件时要根据业务的需求，选择最合适的组件。<br>Lambda架构的评估</p>
+<p>优点：<br>a、数据的不可变性。里面给出的数据传输模型是在初始化阶段对数据进行实例化，这样的做法是能获益良多的。能够使得大量的MapReduce工作变得有迹可循，从而便于在不同阶段进行独立调试。<br>b、强调了数据的重新计算问题。在流处理中重新计算是个主要挑战，但是经常被忽视。比方说，某工作流的数据输出是由输入决定的，那么一旦代码发生改动，我们将不得不重新计算来检视变更的效度。什么情况下代码会改动呢？例如需求发生变更，计算字段需要调整或者程序发出错误，需要进行调试。<br>缺点：<br>a、Jay Kreps认为Lambda包含固有的开发和运维的复杂性。Lambda需要将所有的算法实现两次，一次是为批处理系统，另一次是为实时系统，还要求查询得到的是两个系统结果的合并。</p>
+<p>由于存在以上缺点，Linkedin的Jay kreps提出了Kappa架构如图（I）：</p>
+<img src="/images/数据系统架构之Lambda architecture/graph9.png" class="full-image" title="图（I）"> 
+<p>1、使用Kafka或其它系统来对需要重新计算的数据进行日志记录，以及提供给多个订阅者使用。例如需要重新计算30天内的数据，我们可以在Kafka中设置30天的数据保留值。<br>2、当需要进行重新计算时，启动流处理作业的第二个实例对之前获得的数据进行处理，之后直接把结果数据放入新的数据输出表中。<br>3、当作业完成时，让应用程序直接读取新的数据记录表。<br>4、停止历史作业，删除旧的数据输出表。</p>
+<p>Kappa架构暂时未做深入了解，在此不做评价。我个人觉得，不同的数据架构有各自的优缺点，我们使用的时候只能根据应用场景，选择更合适的架构，才能扬长避短。</p>
+<p>参考资料：</p>
+<p>Big Data: Principles and best practices of scalable real-time data systems——Nathan Marz<br><a href="http://blog.csdn.net/brucesea/article/details/45937875" target="_blank" rel="external">http://blog.csdn.net/brucesea/article/details/45937875</a><br><a href="https://zhuanlan.zhihu.com/p/20510974" target="_blank" rel="external">https://zhuanlan.zhihu.com/p/20510974</a><br><a href="http://www.infoq.com/cn/news/2014/09/lambda-architecture-questions" target="_blank" rel="external">http://www.infoq.com/cn/news/2014/09/lambda-architecture-questions</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 大数据 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Lambda architecture </tag>
+            
+            <tag> 数据架构 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Bloom filter(布隆过滤器)概念与原理]]></title>
+      <url>/2016/05/26/Bloom%20filter(%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8)%E6%A6%82%E5%BF%B5%E4%B8%8E%E5%8E%9F%E7%90%86/</url>
+      <content type="html"><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计呢？接下来介绍的布隆过滤器（Bloom Filter）就可以满足当前的使用场景（注释：基数计数法同样能满足pv、uv的统计）。</p>
+<h1 id="布隆过滤器简介"><a href="#布隆过滤器简介" class="headerlink" title="布隆过滤器简介"></a>布隆过滤器简介</h1><p>布隆过滤器（Bloom Filter）是1970年由布隆提出的一种空间空间效率很高的随机数据结构，它利用位数组很简洁地表示一个集合，并判断一个元素是否属于这个集合。使用布隆过滤器，存在第一类出错（False positive ），但是不会存在第二类错误（False negative），因此，布隆过滤器拥有100%的召回率。也就是说，布隆过滤器能够准确判断一个元素不在集合内，但只能判断一个元素可能在集合内。因此，Bloom Filter不适合“零错误”的应用场合。在能够容忍低错误的应用场合下，Bloom Filter通过极少的错误换取了存储空间的极大节省。我们可以向布隆过滤器里添加元素，但是不能从中移除元素（普通布隆过滤器，增强的布隆过滤器是可以移除元素的）。随着布隆过滤器中元素的增加，犯第一类错误的可能性也随之增大。</p>
+<h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>一个空的布隆过滤器有长度为M比特的bit数组构成，且所有位都初始化0。一个元素通过K个不同的hash函数随机散列到bit数组的K个位置上，K必须远小于M。K和M的大小由错误率（false positive rate）决定。</p>
+<img src="/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
+<p>Bloom Filter 的一个例子集合{ x, y, z }。带有颜色的箭头表示元素经过 $k（k＝3）$ hash函数的到在M（bit数组）中的位置。元素W不在S集合中，因为元素W经过k个hash函数得到在M（bit数组）的k个位置中存在值为0的位置。<br>向集合S中添加元素x：x经过k个散列函数后，在M中得到k个位置，然后，将这k个位置的值设置为1。<br>判断x元素是否在集合S中：x经过k个散列函数后，的到k个位置的值，如果这k个值中间存在为0的，说明元素x不在集合中——元素x曾经插入到过集合S，则M中的k个位置会全部置为1；如果M中的k个位置全为1，则有两种情形。情形一：这个元素在这个集合中；情形二：曾经有元素插入的时候将这k个位置的值置为1了（第一类错误产生的原因False Positive）。简单的布隆过滤器无法区分这两种情况，在增强版中解决了这个问题。<br>设计k个相互独立的hash函数可能工作量比较大，但是一个好的hash函数是降低误判率的关键。一个良好的hash函数应该有宽输出，他们之间的冲突应尽量低，这样k个hash函数能静可能的将值hash的更多的位置。hash函数的设计是我们可以将k个不同的值$\left (0, 1, \cdots , k - 1  \right )$ 作为参数传入，或者将它们加入主键中。对于大的M或者k，hash函数之间的独立性对误判率影响非常大（(Dillinger &amp; Manolios (2004a), Kirsch &amp; Mitzenmacher (2006))）,Dillinger在k个散列函数中，多次使用同一个函数散列，分析对误判率的影响。<br>对于简单布隆过滤器来说，从集合S中移除元素x是不可能的，且false negatives不允许。元素散列到k个位置，尽管可以 将这k个位置的值置为0来移除这个元素，但是这同事也移除了那些散落后，有值落在这k位中的元素。因此，没有一种方法可以判断移除这个元素后是否影响其它已经加入集合中的元素，将k个位置置为0会引入二类误差（false negative）。</p>
+<h2 id="时间复杂度和空间复杂度"><a href="#时间复杂度和空间复杂度" class="headerlink" title="时间复杂度和空间复杂度"></a>时间复杂度和空间复杂度</h2><p>在false positives的情况下，布隆过滤器相比其它的集合（平衡二叉树、树、hash表、数组、链表）只需要少量的存储空间。布隆过滤器的添加和检查元素是否在集合内的复杂度为O(K)。Hash表的平均复杂度比布隆过滤器更低。Bloom 过滤器在误差最优的情况下，平均每个元素大概是1.44bit。</p>
+<h2 id="错误率估计"><a href="#错误率估计" class="headerlink" title="错误率估计"></a>错误率估计</h2><p>布隆过滤器判断一个元素是否属于它表示的集合时会存在已定的错误率（false positive rate），接下来就估计错误率的大小。在估计误差前，我们假设$kn &lt; m$(k哈希函数的个数，n集合中元素的个数，m bit数组的长度）且哈希函数之间时相互独立的，哈希函数散列的bit数组M中的位置时完全随机的。<br>一个长度为m的bit数组，元素在插入时经过一次哈希散列后bit数组的某个位置的值没有被置为1的概率为<br>$$1-\frac{1}{m}$$<br>经过k个哈希函数散列后，还未被置为1的概率为<br>$$(1-\frac{1}{m})^{k}$$<br> 如果插入n个元素后，该位置还未被置为1的概率为<br> $$(1-\frac{1}{m})^{kn}$$<br> 所以被置为1的概率为<br>$$1-(1-\frac{1}{m})^{kn}$$<br>现在判断一个元素是否在结合中，经过k个函数散列到k个bit数组的不同位置。所有这些位置的值为1的概率——误判率。<br>$$(1-\left [ 1-\frac{1}{m} \right ]^{kn})^{k} \approx (1-e^{\frac{-kn}{m}})^{k}$$<br>这里使用了这个极限<br>$$\lim_{x \to \infty }\left ( 1 - \frac{1}{x} \right )^{-x}=e$$<br>这种计算方法不严格，因为前面假设哈希函数和散列后值的分布是相互独立的。但是，这个假设随着m和n的增大误判率更接近真实的误判率。<br>Mitzenmacher and Upfal 证明无假设情况下的误判率的期望值相同。</p>
+<h1 id="最优的哈希函数个数"><a href="#最优的哈希函数个数" class="headerlink" title="最优的哈希函数个数"></a>最优的哈希函数个数</h1><p>既然布隆过滤器将集合映射到位数组中，那么选多少个hash函数才是错误率最低的情况。这里有两个互斥的理由：如果哈希函数的个数多，那么在对一个不属于集合的元素进行查询时得到0的概率就大；但另一方面，如果哈希函数的个数少，那么位数组中的0就多。为了得到最优的哈希函数个数，我们需要根据上一小节中的错误率公式进行计算。<br>$$p = \left( 1 - e^{\frac{kn}{m}}\right)^{k}$$<br>两边取自然对数<br>$$p = exp \left ( kln \left ( 1 - e^{-\frac{kn}{m}} \right ) \right )$$<br>令 $$p =kln \left ( 1 - e^{\frac{kn}{m}}\right )$$<br>只要g取最小值，p就能取到最小值。由于p＝e^(-nk/m),我们可以将g改写为<br>$$g=-\frac{m}{n}ln \left (p \right ) ln \left (1 - p \right )$$<br>根据对称法则（对函数进行求导）可以得到当$p＝\frac{1}{2}$时，也就是$k＝ln2*\left (\frac{m}{n} \right )$时，g取得最小值，在这种情况下，最小的错误率$p=\left (\frac{1}{2}  \right )^{k}\approx 0.6185^{\frac{m}{n}}$。p＝1/2对应着位数组中0和1各半。换句话说，想保持错误率低，最好让位数组有一半还空着。</p>
+<h1 id="位数组的大小"><a href="#位数组的大小" class="headerlink" title="位数组的大小"></a>位数组的大小</h1><p>在给定n（集合中元素的个数）和错误率（最优函数个数k的的错误率）的情况下，位数组M的大小计算，在最优k的情况下<br>$$p=\left ( 1-e^{-\left ( \frac{m}{n}ln2 \right )\frac{n}{m}} \right )^{\frac{m}{n}ln2}$$<br>化简为<br>$$lnp = -\frac{m}{n}\left ( ln2 \right )^{2}$$<br>得到<br>$$m = -\frac{nlnp}{\left ( ln2 \right )^{2}}$$<br>这意味着在错误率为p的情况下，布隆过滤器的长度为m才能容纳n个元素（以上计算基于n,m-&gt;∞）。</p>
+<h1 id="布隆过滤器中元素个数的估算"><a href="#布隆过滤器中元素个数的估算" class="headerlink" title="布隆过滤器中元素个数的估算"></a>布隆过滤器中元素个数的估算</h1><p>Swamidass &amp; Baldi (2007)给出了布隆过滤器元素个数估算的方法（详细证明方式参考论文）<br>$$n^{\ast  } = - \frac{m ln \left [ 1-\frac{X}{m} \right ]}{k}$$<br>其中，n*表示布隆过滤元素个数的估算值，m表示布隆过滤器的大小，k表示哈希函数的个数，X表示布隆过滤器位值位1的个数。</p>
+<h1 id="布隆过滤器的并和交"><a href="#布隆过滤器的并和交" class="headerlink" title="布隆过滤器的并和交"></a>布隆过滤器的并和交</h1><p>布隆过滤器可以用来估算两个集合之间的并合交。一下给出两个集合之间并的计算方式：<br>$$n(A)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( A \right )}{m} \right ]}{k}$$<br>$$n(B)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( B \right )}{m} \right ]}{k}$$<br>A和B之间的并集的个数为：<br>$$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = -\frac{m ln\left [ 1 - \frac{n\left ( A \bigcup B \right )}{m} \right ]}{k}$$<br>所以A<em>与B</em>之间的交集的个数为：<br>$$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = n\left ( A^{\ast } \right ) + n\left ( B^{\ast } \right ) + n\left ( A^{\ast } \bigcup A^{\ast }  \right )$$</p>
+<h1 id="布隆过滤的特性"><a href="#布隆过滤的特性" class="headerlink" title="布隆过滤的特性"></a>布隆过滤的特性</h1><p>布隆过滤器能够容纳任意多的元素（误判率会增加），总是能向布隆过滤器中添加元素，不会报错（Out Memory等）;<br>布隆过滤器可以很方便的通过计算机的or \and操作计算两个集合元素之间的交集（intersection）和并集（union）,但是同样影响布隆过滤的准确性。</p>
+<h1 id="使用例子"><a href="#使用例子" class="headerlink" title="使用例子"></a>使用例子</h1><p>Google bigtable、apache hbase 和 apache cassandra使用bloom过滤器判断是否存在该行（rows）或（colums），以减少对磁盘的访问，提高数据库的访问性能；<br>比特币使用布隆过滤判断钱包是否同步OK。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在计算机这个领域里，我们常常碰到时间换空间\或空间换时间的情况，为了达到某一方面的性能，牺牲另外一方面。Bloom Filter在时间和空间着两者之间引入了另外一个概念——错误率。也就是前文提到的布隆过滤不能准确判断一个元素是否在集合内（类似的设计还有基数统计法）。引入错误率后，极大的节省了存储空间。<br>自从Burton Bloom在70年代提出Bloom Filter之后，Bloom Filter就被广泛用于拼写检查和数据库系统中。近一二十年，伴随着网络的普及和发展，Bloom Filter在网络领域获得了新生，各种Bloom Filter变种和新的应用不断出现。可以预见，随着网络应用的不断深入，新的变种和应用将会继续出现，Bloom Filter必将获得更大的发展。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 大数据 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 概率统计原理 </tag>
+            
+            <tag> 实时计算 </tag>
+            
+            <tag> Bloom filter </tag>
+            
+            <tag> 布隆过滤器 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[自由博客之路]]></title>
+      <url>/2015/06/18/%E8%87%AA%E7%94%B1%E5%8D%9A%E5%AE%A2%E4%B9%8B%E8%B7%AF/</url>
+      <content type="html"><![CDATA[<h2 id="为什么要建立自己的博客"><a href="#为什么要建立自己的博客" class="headerlink" title="为什么要建立自己的博客"></a>为什么要建立自己的博客</h2><p>一直以来纠结于在哪里写博客，曾经使用过CSDN、阿里云溪社区等博客空间，都觉得不是非常满意。曾觉得搭建一个Web服务、购买DNS域名比较麻烦，一直想搭建一个只属于我自己的个人网站，又未动手搭建。但最终在<a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>和<a href="http://wuchong.me/" target="_blank" rel="external">Jark个人博客</a>的诱惑下，周末搞了一天把博客弄出来了（发现好多想法都与Jark不谋而合）。从购买域名，选择网站发布方式，又捣鼓主题，整个过程还是非常有意思。最终感觉搭建一个属于自己的个人网站，也没有想象的那么难、那么复杂，如果您也渴望拥有属于自己的个人网站，请马上行动起来。  </p>
+<p>之所以要一个独立的博客，我觉得一下几个原因在驱动我：</p>
+<ol>
+<li><strong>独立，自由，简介：</strong> 自己的博客可以根据自己的喜好选择主题，博客整体整洁，不会出现广告满天飞舞；  </li>
+<li><strong>够酷：</strong> 能有一个专属自己的域名。既是是saixia.github.com，那我也觉得自己是在别人的地上种菜。一定要saixia.me，才是自家的地；  </li>
+<li><strong>自我驱动：</strong> 在自家的菜园子里种菜，总是比在他人菜地种菜要有激情。同时在自我总结的过程中，将知识沉淀下来，自我提升。最近学习NLP希望自己能够坚持下来；  </li>
+<li><strong>回馈精神：</strong> 在互联网时代，应为大家的分享，让我们的生活方式发生了非常大的变化。我们不断从网络获取知识，当然也要回馈于网络；  </li>
+<li><strong>成长的印记：</strong> 分享的过程中间，记录下自己和家人的成长历程。  </li>
+</ol>
+<h2 id="Hexo你的博客"><a href="#Hexo你的博客" class="headerlink" title="Hexo你的博客"></a>Hexo你的博客</h2><p>为什么是Hexo？Hexo是一个快速、简洁且高效的博客框架。而且可以使用markdown解析文章，在几秒内，即可利用靓丽的主题生成静态网页<a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="external">引用于Hexo文档</a>。通过网络查看Hexo的评价，获得各位自由博客人的一致好评，最终确定采用Hexo搭建自己的博客。网站的搭建过程网络上有非常都的文章，我在此就不班门弄斧了。当然为方便您的建站，我会在文章末尾列举出我的建站过程中所参考的文章。  </p>
+<p>以下主要谈谈建站的主要流程和自己的感受：<br><strong>1. 安装Node：</strong> Hexo框架依赖与Node JS，直接按照Hexo文档安装就ok；<br><strong>2. 安装git、注册GitHub：</strong> 用来推送代码和托管网站（Github是国外的，国内也可以考虑GitCafe部署代码）。注意：Hexo部署代码的时候不要使用git push代码，需要采用Hexo deploy。代码中需要添加CNAME文件，配置主页地址（如：我的是saixia.me），github需要将网站项目发布为一个GitHub Pages；<br><strong>3. 域名申请：</strong> 国内域名申请推荐使用阿里云旗下的<a href="https://wanwang.aliyun.com/domain/" target="_blank" rel="external">万网</a>和腾讯云旗下的<a href="https://www.dnspod.cn/" target="_blank" rel="external">dnspod</a>，我采用的是阿里云旗下的万网，域名申请以后需要配置github的访问地址；<br><strong>4. 构建自己的网站</strong> 按照Hexo的说明文档初始化一个Hexo项目，然后部署到github上。中间需要修改hexo的deploy配置。 </p>
+<p>可以跟进自己的需要捣鼓自己喜欢的主题，如果你是前端高手，还可以开发自己喜欢的主题。希望您的加入让Hexo主题更加丰富。你也可以根据自己的需要添加评论去，本文采用commentit作为评论的模块。因为本人对js不熟悉，花了较多的时间调整。目前评论模块还没有搞好。</p>
+<p>博客迁移：</p>
+<ol>
+<li>下载source、themes、_config.yml;</li>
+<li>hexo init初始化一个项目；</li>
+<li>替换1步中下载的文件；</li>
+<li>初始化git代码库：git init -&gt; git add . -&gt; git commit -m ‘注释’ 提交代码</li>
+<li>添加远程仓库地址：git remote add origin url；</li>
+<li>推送到远程仓库：git push origin master:hexo;(我用hexo分之存储源文件)</li>
+</ol>
+<p>package.json里的内容为：记录一下自己的插件配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  &quot;name&quot;: &quot;hexo-site&quot;,</div><div class="line">  &quot;version&quot;: &quot;0.0.0&quot;,</div><div class="line">  &quot;private&quot;: true,</div><div class="line">  &quot;hexo&quot;: &#123;</div><div class="line">    &quot;version&quot;: &quot;3.3.8&quot;</div><div class="line">  &#125;,</div><div class="line">  &quot;dependencies&quot;: &#123;</div><div class="line">    &quot;hexo&quot;: &quot;^3.2.0&quot;,</div><div class="line">    &quot;hexo-asset-image&quot;: &quot;0.0.3&quot;,</div><div class="line">    &quot;hexo-deployer-git&quot;: &quot;^0.3.1&quot;,</div><div class="line">    &quot;hexo-generator-archive&quot;: &quot;^0.1.4&quot;,</div><div class="line">    &quot;hexo-generator-category&quot;: &quot;^0.1.3&quot;,</div><div class="line">    &quot;hexo-generator-index&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-generator-search&quot;: &quot;^2.1.1&quot;,</div><div class="line">    &quot;hexo-generator-tag&quot;: &quot;^0.2.0&quot;,</div><div class="line">    &quot;hexo-renderer-ejs&quot;: &quot;^0.3.0&quot;,</div><div class="line">    &quot;hexo-renderer-marked&quot;: &quot;^0.3.0&quot;,</div><div class="line">    &quot;hexo-renderer-stylus&quot;: &quot;^0.3.1&quot;,</div><div class="line">    &quot;hexo-server&quot;: &quot;^0.2.2&quot;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="留言添加"><a href="#留言添加" class="headerlink" title="留言添加"></a>留言添加</h2><p>为了使博客支持评价，我尝试了很多种评价系统，要么就是评价提供不提供服务、要么就是服务器在国外访问太慢等种种原因。最终我选择了畅言，不过畅言评论平台需要提供备案号。为此我还专门在阿里云上进行了备案，备案还比较简单，就是需要提供一堆的材料，然后就是等各部门审核。整个过程花费了一个多月的时间，备案大概需要花费了十几元。注释：备案是指域名的备案。</p>
+<p>畅言评论的支持具体的添加方式，本文就不做详细讲解，畅言平台的帮助文档里面有详细的添加说明。评论颜色可以在畅言平台设置。</p>
+<h2 id="主题修改"><a href="#主题修改" class="headerlink" title="主题修改"></a>主题修改</h2><p>一开始使用MiccallTheme主题，感觉比较库。但是使用过程中间发现无法重本地加载资源。后来自己修改了里面的代码，图片显示正常。但是对于代码块和markdowm显示不够友好。后来发现next主题非常不错，而且很多人在使用，资料也非常详细，功能丰富。主要的设置可以直接在使用文档中查询到，如果有使用疑问，也可以在github上提问。</p>
+<h2 id="博客公式支持"><a href="#博客公式支持" class="headerlink" title="博客公式支持"></a>博客公式支持</h2><p>对于搞算法的同学，经常要编写公式。如果博客能够支持公式编写，那对于写博客是非常方便的一件事情。hexo next主题支持MathJax，具体可以查看主题如何开启。公式编写可参考一下链接<a href="https://www.mathjax.org/#features" target="_blank" rel="external">https://www.mathjax.org/#features</a>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">单行：f(x)=a+b</div><div class="line">代码：单行：$f(x)=a+b$</div><div class="line"></div><div class="line">多行采用两个$$符号：</div><div class="line">f(x)=a+b</div><div class="line">代码：</div><div class="line">多行采用两个$$符号：</div><div class="line">$$f(x)=a+b$$</div></pre></td></tr></table></figure></p>
+<p>公式编写可以在此处编写<a href="http://latex.codecogs.com/" target="_blank" rel="external">http://latex.codecogs.com/</a>,编写方式类似word中的mathtype。</p>
+<h2 id="博客图片添加"><a href="#博客图片添加" class="headerlink" title="博客图片添加"></a>博客图片添加</h2><p>博客图片添加，可以参考这篇博客<a href="http://yangfch3.com/2016/05/08/hexo-experiences/" target="_blank" rel="external">使用 Hexo 与 NexT 搭建博客的避坑总结</a>,插入图片不能采用之前markdown的方式插入，需要使用hexo next主题提供的标签。配置路径的时候需要注意更目录，上面的博客中有提及。</p>
+<h2 id="对博客未来的打算"><a href="#对博客未来的打算" class="headerlink" title="对博客未来的打算"></a>对博客未来的打算</h2><p>既然花了钱又投入了精力搞了一个各人博客，希望自己能够坚持下来。今后主要的学习方向是实时计算和算法（自然语言处理）。学习过程我会沉淀在本博客。希望自己能够以此为动力，驱动自己深入学习一些前沿技术，并锻炼自己总结分享的能力。与此同时也希望自己以后写出来的东西能够帮助到其他人。  </p>
+<h1 id="hexo-常见错误"><a href="#hexo-常见错误" class="headerlink" title="hexo 常见错误"></a>hexo 常见错误</h1><p>1、 TypeError: Cannot read property ‘code’ of undefined ： 配置文件格式不对（yml、json）</p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ol>
+<li><a href="http://www.jianshu.com/p/fd878edb95e7" target="_blank" rel="external">MAC 上 github + hexo 搭建博客教程</a>  </li>
+<li><a href="http://ibruce.info/2013/11/22/hexo-your-blog" target="_blank" rel="external">hexo你的博客</a>  </li>
+<li><a href="https://www.zhihu.com/question/31377141" target="_blank" rel="external">github域名配置和解析</a>  </li>
+<li><a href="http://www.jianshu.com/p/cea41e5c9b2a" target="_blank" rel="external">hexo搭建的Github博客绑定域名</a>  </li>
+<li><a href="http://eleveneat.com/2015/04/24/Hexo-a-blog/" target="_blank" rel="external">利用GitHub-Pages来Hexo一个独立博客</a>  </li>
+<li><a href="https://nodejs.org/en/" target="_blank" rel="external">node js</a>  </li>
+<li><a href="https://github.com/bubkoo/hexo-toc" target="_blank" rel="external">markdown toc</a>  </li>
+<li><a href="http://www.jianshu.com/p/c2ba9533088a" target="_blank" rel="external">图片加载插件</a>  </li>
+<li><a href="https://commentit.io/getting-started" target="_blank" rel="external">添加评论</a>  </li>
+<li><a href="http://www.wuxubj.cn/2016/08/Hexo-nexT-build-personal-blog/" target="_blank" rel="external">Hexo+nexT主题搭建个人博客</a></li>
+<li><a href="https://blog.yizhilee.com/post/blog-config/" target="_blank" rel="external">Hexo 主题基础配置</a></li>
+<li><a href="https://notes.wanghao.work/2015-10-21-%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html#%E9%85%8D%E7%BD%AELeanCloud" target="_blank" rel="external">为NexT主题添加文章阅读量统计功能</a></li>
+<li><a href="http://2wildkids.com/2016/10/06/%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86Hexo%E5%92%8CMathJax%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/" target="_blank" rel="external">如何处理Hexo和MathJax的兼容问题</a></li>
+</ol>
+<p>有任何关于Hexo的问题，欢迎来 <a href="https://coderq.com/c/ji-zhu/hexo" target="_blank" rel="external">Hexo 中文社区</a> 咨询。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> other </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> blog </tag>
+            
+            <tag> hexo </tag>
+            
+            <tag> 建站 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+  
+  
+</search>
