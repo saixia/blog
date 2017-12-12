@@ -95,12 +95,12 @@
 <meta property="og:site_name" content="Seth&#39;s blog">
 <meta property="og:description" content="写在前面在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://saixia.me/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
+<meta property="og:image" content="http://saixia.me/2016/05/26/Bloom%20filter(布隆过滤器)概念与原理/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
 <meta property="og:updated_time" content="2017-08-26T08:12:28.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bloom filter(布隆过滤器)概念与原理">
 <meta name="twitter:description" content="写在前面在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计">
-<meta name="twitter:image" content="http://saixia.me/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
+<meta name="twitter:image" content="http://saixia.me/2016/05/26/Bloom%20filter(布隆过滤器)概念与原理/images/Bloom%20filter(布隆过滤器)概念与原理/graph1.png">
 
 
 
@@ -422,7 +422,7 @@
         <h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计呢？接下来介绍的布隆过滤器（Bloom Filter）就可以满足当前的使用场景（注释：基数计数法同样能满足pv、uv的统计）。</p>
 <h1 id="布隆过滤器简介"><a href="#布隆过滤器简介" class="headerlink" title="布隆过滤器简介"></a>布隆过滤器简介</h1><p>布隆过滤器（Bloom Filter）是1970年由布隆提出的一种空间空间效率很高的随机数据结构，它利用位数组很简洁地表示一个集合，并判断一个元素是否属于这个集合。使用布隆过滤器，存在第一类出错（False positive ），但是不会存在第二类错误（False negative），因此，布隆过滤器拥有100%的召回率。也就是说，布隆过滤器能够准确判断一个元素不在集合内，但只能判断一个元素可能在集合内。因此，Bloom Filter不适合“零错误”的应用场合。在能够容忍低错误的应用场合下，Bloom Filter通过极少的错误换取了存储空间的极大节省。我们可以向布隆过滤器里添加元素，但是不能从中移除元素（普通布隆过滤器，增强的布隆过滤器是可以移除元素的）。随着布隆过滤器中元素的增加，犯第一类错误的可能性也随之增大。</p>
 <h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>一个空的布隆过滤器有长度为M比特的bit数组构成，且所有位都初始化0。一个元素通过K个不同的hash函数随机散列到bit数组的K个位置上，K必须远小于M。K和M的大小由错误率（false positive rate）决定。</p>
-<img src="/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
+<img src="/2016/05/26/Bloom filter(布隆过滤器)概念与原理/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
 <p>Bloom Filter 的一个例子集合{ x, y, z }。带有颜色的箭头表示元素经过 $k（k＝3）$ hash函数的到在M（bit数组）中的位置。元素W不在S集合中，因为元素W经过k个hash函数得到在M（bit数组）的k个位置中存在值为0的位置。<br>向集合S中添加元素x：x经过k个散列函数后，在M中得到k个位置，然后，将这k个位置的值设置为1。<br>判断x元素是否在集合S中：x经过k个散列函数后，的到k个位置的值，如果这k个值中间存在为0的，说明元素x不在集合中——元素x曾经插入到过集合S，则M中的k个位置会全部置为1；如果M中的k个位置全为1，则有两种情形。情形一：这个元素在这个集合中；情形二：曾经有元素插入的时候将这k个位置的值置为1了（第一类错误产生的原因False Positive）。简单的布隆过滤器无法区分这两种情况，在增强版中解决了这个问题。<br>设计k个相互独立的hash函数可能工作量比较大，但是一个好的hash函数是降低误判率的关键。一个良好的hash函数应该有宽输出，他们之间的冲突应尽量低，这样k个hash函数能静可能的将值hash的更多的位置。hash函数的设计是我们可以将k个不同的值$\left (0, 1, \cdots , k - 1  \right )$ 作为参数传入，或者将它们加入主键中。对于大的M或者k，hash函数之间的独立性对误判率影响非常大（(Dillinger &amp; Manolios (2004a), Kirsch &amp; Mitzenmacher (2006))）,Dillinger在k个散列函数中，多次使用同一个函数散列，分析对误判率的影响。<br>对于简单布隆过滤器来说，从集合S中移除元素x是不可能的，且false negatives不允许。元素散列到k个位置，尽管可以 将这k个位置的值置为0来移除这个元素，但是这同事也移除了那些散落后，有值落在这k位中的元素。因此，没有一种方法可以判断移除这个元素后是否影响其它已经加入集合中的元素，将k个位置置为0会引入二类误差（false negative）。</p>
 <h2 id="时间复杂度和空间复杂度"><a href="#时间复杂度和空间复杂度" class="headerlink" title="时间复杂度和空间复杂度"></a>时间复杂度和空间复杂度</h2><p>在false positives的情况下，布隆过滤器相比其它的集合（平衡二叉树、树、hash表、数组、链表）只需要少量的存储空间。布隆过滤器的添加和检查元素是否在集合内的复杂度为O(K)。Hash表的平均复杂度比布隆过滤器更低。Bloom 过滤器在误差最优的情况下，平均每个元素大概是1.44bit。</p>
 <h2 id="错误率估计"><a href="#错误率估计" class="headerlink" title="错误率估计"></a>错误率估计</h2><p>布隆过滤器判断一个元素是否属于它表示的集合时会存在已定的错误率（false positive rate），接下来就估计错误率的大小。在估计误差前，我们假设$kn &lt; m$(k哈希函数的个数，n集合中元素的个数，m bit数组的长度）且哈希函数之间时相互独立的，哈希函数散列的bit数组M中的位置时完全随机的。<br>一个长度为m的bit数组，元素在插入时经过一次哈希散列后bit数组的某个位置的值没有被置为1的概率为<br>$$1-\frac{1}{m}$$<br>经过k个哈希函数散列后，还未被置为1的概率为<br>$$(1-\frac{1}{m})^{k}$$<br> 如果插入n个元素后，该位置还未被置为1的概率为<br> $$(1-\frac{1}{m})^{kn}$$<br> 所以被置为1的概率为<br>$$1-(1-\frac{1}{m})^{kn}$$<br>现在判断一个元素是否在结合中，经过k个函数散列到k个bit数组的不同位置。所有这些位置的值为1的概率——误判率。<br>$$(1-\left [ 1-\frac{1}{m} \right ]^{kn})^{k} \approx (1-e^{\frac{-kn}{m}})^{k}$$<br>这里使用了这个极限<br>$$\lim_{x \to \infty }\left ( 1 - \frac{1}{x} \right )^{-x}=e$$<br>这种计算方法不严格，因为前面假设哈希函数和散列后值的分布是相互独立的。但是，这个假设随着m和n的增大误判率更接近真实的误判率。<br>Mitzenmacher and Upfal 证明无假设情况下的误判率的期望值相同。</p>

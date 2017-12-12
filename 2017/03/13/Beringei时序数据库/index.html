@@ -95,15 +95,15 @@
 <meta property="og:site_name" content="Seth&#39;s blog">
 <meta property="og:description" content="Beringei时序数据库Facebook于2017年2月3日宣布开源他们的高性能时序数据存储引擎Beringer。Berigei内存数据库是用来解决Facebook内部监控数据存储和查询需求的数据库，具有快速读写、高压缩比等特性。本文将从应用场景、设计思路和特点详细介绍Beringei。 Beringer诞生背景Facebook运维大规模的分布式服务，需要监控系统的运行状况和性能指标，以便第一时">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://saixia.me/images/Beringei时序数据库/graph1.png">
-<meta property="og:image" content="http://saixia.me/images/Beringei时序数据库/graph2.png">
-<meta property="og:image" content="http://saixia.me/images/Beringei时序数据库/graph3.png">
-<meta property="og:image" content="http://saixia.me/images/Beringei时序数据库/graph4.png">
+<meta property="og:image" content="http://saixia.me/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph1.png">
+<meta property="og:image" content="http://saixia.me/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph2.png">
+<meta property="og:image" content="http://saixia.me/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph3.png">
+<meta property="og:image" content="http://saixia.me/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph4.png">
 <meta property="og:updated_time" content="2017-08-26T04:50:00.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Beringei时序数据库">
 <meta name="twitter:description" content="Beringei时序数据库Facebook于2017年2月3日宣布开源他们的高性能时序数据存储引擎Beringer。Berigei内存数据库是用来解决Facebook内部监控数据存储和查询需求的数据库，具有快速读写、高压缩比等特性。本文将从应用场景、设计思路和特点详细介绍Beringei。 Beringer诞生背景Facebook运维大规模的分布式服务，需要监控系统的运行状况和性能指标，以便第一时">
-<meta name="twitter:image" content="http://saixia.me/images/Beringei时序数据库/graph1.png">
+<meta name="twitter:image" content="http://saixia.me/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph1.png">
 
 
 
@@ -448,12 +448,12 @@
 <li>如果XOR的值不为0，计算XOR后前置0和尾部0的值，存储bit ‘1’，然后存储a）或b）：<br>&emsp; a)控制位’0’，如果meaning值的bit块落在之前meaning值的bit块内，（当前块前置0和后置0的个数与之前值的个数一样），存储meaning值的bit块；<br>&emsp; b)控制位’1’，否则，采用5bit存储前置0的位置值，然后采用6bit存储XOR后的meaning值；</li>
 </ol>
 <p>如<strong> 图1. </strong> 采用值压缩算法得：$T_1$时刻的值$Value_1$ 12 直接存储；$T_2$时刻的值$Value_2$ 12与$T_1$时刻的值$Value_1$ 12的差值$deltaV_2$ 0，所以直接存储标记位’0’；因为$T_2$时刻没有有meaning值，所以   $T_3$时刻的值$Value_3$ 24 与$T_2$ 时刻的值做XOR运算，存储控制为’11’,然后采用5bit存储XOR值的第一个bit位为1的值11，接着采用6 bit存储XOR后meaning值的bit的长度1，最后存储meaning值的bit块。（如果XOR之后的Meaning块落在之前XOR后的Meaning块内，则存储控制位’10’，然后存储Meaning值的bit块）</p>
-<img src="/images/Beringei时序数据库/graph1.png" class="full-image" title="图1. 压缩算法">
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph1.png" class="full-image" title="图1. 压缩算法">
 <p>采用以上两个算法压缩Facebook的监控数据，可知压缩比极高。<br>时间戳压缩算法，得到各标志位的分布比例如图2。96%的时间戳可以用1bit存储，压缩比极高。</p>
-<img src="/images/Beringei时序数据库/graph2.png" class="full-image" title="图2. 时间戳压缩算法各bit位分布比">
-<p>分体值压缩算法，得到各标志位的分布比例如图3。其中标志位’0’占1bit占比51%，标志位’10’的值占26.6bit占比30%，标志位’11’占36.9bit占比19%。<br><img src="/images/Beringei时序数据库/graph3.png" class="full-image" title="图3. 值压缩算法各bit位分布比"></p>
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph2.png" class="full-image" title="图2. 时间戳压缩算法各bit位分布比">
+<p>分体值压缩算法，得到各标志位的分布比例如图3。其中标志位’0’占1bit占比51%，标志位’10’的值占26.6bit占比30%，标志位’11’占36.9bit占比19%。<br><img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph3.png" class="full-image" title="图3. 值压缩算法各bit位分布比"></p>
 <h3 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h3><p>每两小时产生一个Block块。ShardMap为Vector存储Block块的key和TSmap的地址映射关系。TSmap存储所shards Block块地址和key的映射关系，这样就可以快速复制内存中的数据。Facebook内存存储结构，当无头的数据块还没有刷新时宕机，数据将会丢失。当然，内存数据同样需要持久化硬盘上，当块形成后，Facebook采用Hbase持久化内存数据块。</p>
-<img src="/images/Beringei时序数据库/graph4.png" class="full-image" title="图4. 值压缩算法各bit位分布比">
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph4.png" class="full-image" title="图4. 值压缩算法各bit位分布比">
 <h2 id="Beringei总结"><a href="#Beringei总结" class="headerlink" title="Beringei总结"></a>Beringei总结</h2><p>虽然Beringei算法简单，压缩比和性能都有较大的提高，但是采用Beringei存储监控数据需要case by case的分析业务场景，只有业务场景和Beringei设计原则吻合才能达到较好的压缩比。其次，Beringei部署需要依赖较多的其他框架，部署环境不友好，且Beringei需要持久化数据库支撑。</p>
 <h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a href="http://www.vldb.org/pvldb/vol8/p1816-teller.pdf" target="_blank" rel="external">Gorilla论文地址</a><br><a href="https://github.com/facebookincubator/beringei" target="_blank" rel="external">Beringei代码库</a><br><a href="https://yq.aliyun.com/articles/69354" target="_blank" rel="external">深度解读Facebook刚开源的beringei时序数据库</a><br><a href="http://weixin.niurenqushi.com/article/2017-02-12/4766476.html" target="_blank" rel="external">Facebook开源内存数据库Beringei，追求极致压缩率</a><br><a href="http://www.cnblogs.com/mlog/archive/2010/12/16/2456368.html" target="_blank" rel="external">浮点数标示方法：fast lossless compression of scientific floating-point data</a></p>
 

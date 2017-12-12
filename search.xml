@@ -8,13 +8,13 @@
       <content type="html"><![CDATA[<p>Apache Flink是一个分布式流计算引擎，开发者可以在其上快速实现流式计算。Apache Flink起源2009年在德国柏林理工大学成立的‘Stratosphere’项目。2014年4月成为Apache软件基金的一个孵化项目，8个月之后就成为Apache软件基金的顶级项目。如今有超过250个体向Flink贡献代码。流计算技术快速的被初创公司、企业所采纳，因为它在软件开发、系统架构、商业分析更有效果。本文主要分析传统数据处理架构和流梳理数据架构之间的差异，从而凸显出流计算的特性。</p>
 <h2 id="传统数据分析方法"><a href="#传统数据分析方法" class="headerlink" title="传统数据分析方法"></a>传统数据分析方法</h2><p>传统IT设施、业务应用程序运行于不同的操作系统，数据落地于不同的数据库中，当做数据分析的时候无法满足复杂的分析，大表关联查询性能要么不支持、要么性能非常差。</p>
 <p>替代传统数据库的分析方案是传统的数据仓库。数据仓库的操作过程我们叫他为ETL（extract-transform-load），这个过程包含数据有效性检验、数值标准化、编码、模式转化、重复值去除。ETL是一个非常复杂的一个过程，通常需要专业的技能才能完成这个工作。致命的一点是数据仓库中的数据是周期性更新的，为何是致命的一点后面将做详细讲解。以下是ETL的架构图：</p>
-<img src="/images/流数据处理介绍/TraditionalBatchAnalytics2.png" class="full-image" title="图（A）"> 
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/TraditionalBatchAnalytics2.png" class="full-image" title="图（A）"> 
 <p>这种模式在很长一段时间里，都使用分析型数据库作为数据仓库的载体。最近10年，出现了以MapReduce、HDFS、Hbase为框架的数据处理框架。这种形式存在如下缺点。首先，维持系统的平稳运行就是一个较大的挑战，其中需要配置集群、开发ETL任务、任务调度管理，每个步骤都存在较大的挑战。其次，这种框架在数据处理上存在较大的延迟。数据从业务系统产生到分析出结果的延迟一般需要几个小时，有的甚至超过一天。当然，一个批处理平台只能在事件发生后才能处理这些数据，不能在事件发生的时候处理。</p>
 <h2 id="数据分析演化"><a href="#数据分析演化" class="headerlink" title="数据分析演化"></a>数据分析演化</h2><p>以前，数据分析在几个小时或者一天的延迟内是可以接受的。然而，现在的系统和业务对数据的实效性要求越来越高。例如：商品推荐系统，系统监控。这些都实时收集这些数据并处理，根据处理结果做相应的应对动作。</p>
 <p>流计算处理就能够满足上面的要求，数据产生出来后在几秒内就处理完得出分析结果。根据传统ETL结构图，流计算架构图如下：</p>
-<img src="/images/流数据处理介绍/StreamingAnalytics.png" class="full-image" title="图（B）">
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/StreamingAnalytics.png" class="full-image" title="图（B）">
 <p>CDC（change data capture）获取业务系统变化的记录，例如通过采集Binlog日志。常见的消息队列有Kafka，Metaq、TT，其中有保序和不保序的消息队列。流处理统计得出对应的指标，并将结果存在在KV数据库（HBase）上，最终通过dashboard展示结果或者推送个应用系统做出相应的推荐。流处理的第一个优点是延迟小，因为流计算处理不需要数据加载，定时批量处理数据。因为流处理数据摄入和处理在一个框架内处理的，所以流处理系统不需要处理数据摄入、任务调度，相比批处理系统更加稳定。</p>
-<h1 id="流数据分析"><a href="#流数据分析" class="headerlink" title="流数据分析"></a>流数据分析</h1><p>对于延迟非常低的一些应用，批处理无法满足这样的低延迟，流处理能非常的满足这种场景。这些应用如：</p>
+<h2 id="流数据分析"><a href="#流数据分析" class="headerlink" title="流数据分析"></a>流数据分析</h2><p>对于延迟非常低的一些应用，批处理无法满足这样的低延迟，流处理能非常的满足这种场景。这些应用如：</p>
 <ul>
 <li>异常检测，例如：检测网络攻击；</li>
 <li>实时推荐，例如：根据用户最近几分钟的行为动作，为用户推荐商品；</li>
@@ -23,7 +23,7 @@
 <li>在新兴技术中的应用，如：物联网。</li>
 </ul>
 <p>然而，解决以上场景的能力并不是寻找分布式流处理的唯一动因。它同样为数据应用提供了一种可扩展的数据架构。系统间通过定义好的接口通信，各系统之间相互独立。架构图如下：</p>
-<img src="/images/流数据处理介绍/StreamingBeyondAnalytics.png" class="full-image" title="图（C）">
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/StreamingBeyondAnalytics.png" class="full-image" title="图（C）">
 <p>图中，有一个web和日志采集服务实时采集数据并将数据写入消息队列中。带状态的流应用处理将数据摄入，处理，最后将结果写入消息队列或者写入数据库中通过可视化工具展示出来。</p>
 <p>这种架构除具有以上优点外，还具备一下优点。通过持久化的消息队列在带状态的应用程序中进行通信具备如下优势：</p>
 <ul>
@@ -34,14 +34,14 @@
 <li>最后，这种框架容易扩展，应为消息队列和流处理都是分布式系统；</li>
 </ul>
 <p>上述解决方案，为业务提供了OLTP库类似的解决方案，但又具备上面所列举的特性。 </p>
-<h1 id="开源流处理演进"><a href="#开源流处理演进" class="headerlink" title="开源流处理演进"></a>开源流处理演进</h1><p>数据流处理不是一项新技术。第一个研究原型和商业化产品可以回溯到20世纪90年代。然而，最近的流处理技术主要是基于开源软件发展起来。今天，分布式开源流处理引擎为许多不同领域的企业提供关键业务应用，如：在线零售，社交媒体，电信，游戏，和银行。开源软件是这一趋势的主要推动力，主要是由于以下两个原因。其一，开源软件每个人都可以使用和改进它。其二，由于开源社区的努力，可扩展的流处理技术正在迅速成熟和发展。仅Apache软件基金就有10多个项目于流处理相关。新的流处理项目还在源源不断的进入开源社区，且以新的特性和能力挑战当前的新技术。这些新系统的许多特性正被其他流处理框架采纳和吸收。此外，开软软件的使用者可以请求或贡献缺少的新功能，以支持这些场景。就这样开源社区不断提高项目的处理能力，进一步推动流计算处理。我们将简要回顾一下流处理的发展历程并将展望未来。</p>
+<h2 id="开源流处理演进"><a href="#开源流处理演进" class="headerlink" title="开源流处理演进"></a>开源流处理演进</h2><p>数据流处理不是一项新技术。第一个研究原型和商业化产品可以回溯到20世纪90年代。然而，最近的流处理技术主要是基于开源软件发展起来。今天，分布式开源流处理引擎为许多不同领域的企业提供关键业务应用，如：在线零售，社交媒体，电信，游戏，和银行。开源软件是这一趋势的主要推动力，主要是由于以下两个原因。其一，开源软件每个人都可以使用和改进它。其二，由于开源社区的努力，可扩展的流处理技术正在迅速成熟和发展。仅Apache软件基金就有10多个项目于流处理相关。新的流处理项目还在源源不断的进入开源社区，且以新的特性和能力挑战当前的新技术。这些新系统的许多特性正被其他流处理框架采纳和吸收。此外，开软软件的使用者可以请求或贡献缺少的新功能，以支持这些场景。就这样开源社区不断提高项目的处理能力，进一步推动流计算处理。我们将简要回顾一下流处理的发展历程并将展望未来。</p>
 <p>第一个获得大量使用的开源分布式流计算处理引擎专注于毫米级的时间处理，并保证系统发生故障时事件不丢失。这些系统提供底层API并且不提供对流式应用的准确一致的结果支持，应为结果取决于事件抵达的时间和先后顺序。而且，就算事件不会在失败的时候丢失，同一个事件也会存在重复。</p>
 <p>与提供准确和高延迟的批处理相反，第一个开源流处理器倾向于用准确性换地延迟。这样的数据处理系统能够提供低延迟和存在一定误差的结果。这种系统结构叫做Lambda架构，如下图：</p>
-<img src="/images/流数据处理介绍/LambdaArchitecture.png" class="full-image" title="图（D）">
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/LambdaArchitecture.png" class="full-image" title="图（D）">
 <p>Lambda架构利用地延迟的流计算处理支持Speed Layer增强传统批出来系统。数据抵达Lambda架构后由流处理器读取数据，并将数据写入批处理存储上，如：HDFS。流处理器几乎实时的计算出估计结果，并将结果写入Speed Table中。批处理器周期性的将写在批量存储器上的数据处理完。准确的结果将写入Batch Table并删除Speed Table上的估计结果。服务层通过合并来源于Speed Table的估计结果和Batch Table的精确结果为应用程序提供服务。Lambda架构目的时在于改善批处理系统的高延迟。然而，这种方法也存在非常明显的缺点。首先，需要分别实现两套处理系统语义不同的接口。其次，流计算处理器计算的结果是一个估计值，而不是一个准确的结果。再次，Lambda架构难以设置和维护。流处理器、批处理器、速度存储、批存储、数据摄入、批处理任务调度器都需要使用说明手册。</p>
 <p>第二代流处理器，在第一代的基础上改善了准确性，实现了一个事件之消费一次的语义（exactly once）。同时提供的API相比第一代更加高级，在吞吐量和失败恢复上都有较大的改善。但是还是没有解决乱序的问题，计算结果还是受数据的消费顺序影响。</p>
 <p>在第三代流处理器的计算结果不在依赖数据的消费顺序，能够准确计算出结果。另一个改进是吞吐-延迟衡量。这一代流计算处理器使得Lambda架构被淘汰。说了这么多，接下来我们看一个第三代流处理引擎flink。</p>
-<h1 id="初探Flink"><a href="#初探Flink" class="headerlink" title="初探Flink"></a>初探Flink</h1><p>Apache Flink是一个分布式流计算引擎，据有第三代引擎的特性。她在大规模数据处理上提供了准确的、高吞吐、地延迟的处理。以下是Flink的特性，详细的特性请参考Flink官网：<a href="https://flink.apache.org/。" target="_blank" rel="external">https://flink.apache.org/。</a></p>
+<h2 id="初探Flink"><a href="#初探Flink" class="headerlink" title="初探Flink"></a>初探Flink</h2><p>Apache Flink是一个分布式流计算引擎，据有第三代引擎的特性。她在大规模数据处理上提供了准确的、高吞吐、地延迟的处理。以下是Flink的特性，详细的特性请参考Flink官网：<a href="https://flink.apache.org/。" target="_blank" rel="external">https://flink.apache.org/。</a></p>
 <ul>
 <li>Flink提供三种时间语义：事件事件（event-time），摄入事件（ingestion-time），处理事件（Processing-time）；</li>
 <li>Flink实现了仅处理一次（exactly-once）和至少(At-least-once)处理一次的语义；</li>
@@ -59,12 +59,12 @@
 <p>2、执行一下命令解压压缩文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar xvfz flink-1.1.3-bin-hadoop27-scala_2.11.tgz</div></pre></td></tr></table></figure></p>
 <p>3、启动Flink的本地模式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cd flink-1.1.3</div><div class="line">./bin/start-local.sh</div></pre></td></tr></table></figure></p>
 <p>4、在浏览器中输入<a href="http://localhost:8081打开监控页面。将会看一些统计之宝，表明本地Flink集群已经启动。它将显示单个任务管理器（Flink的工作进程）已连接，并且单个任务槽（由任务管理器提供的资源单元）可用。" target="_blank" rel="external">http://localhost:8081打开监控页面。将会看一些统计之宝，表明本地Flink集群已经启动。它将显示单个任务管理器（Flink的工作进程）已连接，并且单个任务槽（由任务管理器提供的资源单元）可用。</a></p>
-<img src="/images/流数据处理介绍/DashboardScreenshot1.png" class="full-image" title="图（E）">
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/DashboardScreenshot1.png" class="full-image" title="图（E）">
 <p>5、下载测试用例。<br>wget <a href="https://streaming-with-flink.github.io/examples/download/examples-scala.jar" target="_blank" rel="external">https://streaming-with-flink.github.io/examples/download/examples-scala.jar</a></p>
 <p>注：你需要自己通过README打包项目为jar包。</p>
 <p>6、在本地集群上提交测试用例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/flink run -c io.github.streamingwithflink.AverageSensorReadings examples-scala.jar</div></pre></td></tr></table></figure></p>
 <p>7、打开web监控将看到一个运行的job。可以点击job链接查看job的监控信息</p>
-<img src="/images/流数据处理介绍/DashboardScreenshot2.png" class="full-image" title="图（F）">
+<img src="/2017/12/13/流数据处理介绍/images/流数据处理介绍/DashboardScreenshot2.png" class="full-image" title="图（F）">
 <p>8、Apache Flink集群默认数据输出的路径为./out。可以通过如下命令看看输出：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tail -f ./log/flink-&lt;user&gt;-jobmanager-&lt;hostname&gt;.out</div></pre></td></tr></table></figure></p>
 <p>将在终端看到如下类似信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">SensorReading(sensor_2,1480005737000,18.832819812267438)</div><div class="line">SensorReading(sensor_5,1480005737000,52.416477673987856)</div><div class="line">SensorReading(sensor_3,1480005737000,50.83979980099426)</div><div class="line">SensorReading(sensor_4,1480005737000,-17.783076985394775)</div></pre></td></tr></table></figure></p>
 <p>9、至此，已经运行了一个流计算程序。程序需要手动停止，可以在监控页面操作，可以在命令行下操作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/stop-local.sh</div></pre></td></tr></table></figure></p>
@@ -173,7 +173,7 @@
 <figure class="highlight py"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># set some inputs</span></div><div class="line">x = <span class="number">-2</span>; y = <span class="number">5</span>; z = <span class="number">-4</span></div><div class="line"></div><div class="line"><span class="comment"># perform the forward pass</span></div><div class="line">q = x + y <span class="comment"># q becomes 3</span></div><div class="line">f = q * z <span class="comment"># f becomes -12</span></div><div class="line"></div><div class="line"><span class="comment"># perform the backward pass (backpropagation) in reverse order:</span></div><div class="line"><span class="comment"># first backprop through f = q * z</span></div><div class="line">dfdz = q <span class="comment"># df/dz = q, so gradient on z becomes 3</span></div><div class="line">dfdq = z <span class="comment"># df/dq = z, so gradient on q becomes -4</span></div><div class="line"><span class="comment"># now backprop through q = x + y</span></div><div class="line">dfdx = <span class="number">1.0</span> * dfdq <span class="comment"># dq/dx = 1. And the multiplication here is the chain rule!</span></div><div class="line">dfdy = <span class="number">1.0</span> * dfdq <span class="comment"># dq/dy = 1</span></div></pre></td></tr></table></figure>
 <p>最后我们将梯度赋值给变量 $[dfdx, dfdy, dfdz]$, 这些值告诉我们函数 $f$ 对于 $x$， $y$， $z$的敏感度。这个简单的例子阐述了反向传播的过程。今后我们将采用更加简洁的写法，因此我们不使用 $df$。这个例子中使用 $dfdq$ 表示 $dq$梯度的最终输出。</p>
 <p>上面的计算过程通过下图图解：</p>
-<img src="/images/Vector Matrix and Tensor Derivatives/graph1.jpg" class="full-image">
+<img src="/2017/08/06/Vector Matrix and Tensor Derivatives/images/Vector Matrix and Tensor Derivatives/graph1.jpg" class="full-image">
 <h1 id="直观理解反向传播"><a href="#直观理解反向传播" class="headerlink" title="直观理解反向传播"></a>直观理解反向传播</h1><p>反向传播是一个优美的本地处理过程。图中每个计算单元获得输入后，可以立即算出输出值和当前梯度（local gradient）。值得注意的是，计算过程无需关系全图中的其他值，就可以计算出当前梯度。当全部的前向传播计算完以后，逆向传播就可以根据前向传播的值计算梯度。采用链式法则，可以计算出所有输入的偏导。</p>
 <blockquote>
 <p>神经网络中每个计算单元也可以采用链式法则求得输出值和每个变量的偏导。  </p>
@@ -187,7 +187,7 @@
 <p>$$f(x)=e^x\rightarrow\frac{\partial f}{\partial x}=e^x$$</p>
 <p>$$f_a(x)=ax\rightarrow\frac{\partial f}{\partial x}=a$$</p>
 <p>函数$f_a$分别表示上式中的常数 $c$ 和 $a$。这可以当做已有一个输入的特殊的加法和乘法处理单元。在整个处理过程如下：</p>
-<img src="/images/Vector Matrix and Tensor Derivatives/graph2.jpg" class="full-image">
+<img src="/2017/08/06/Vector Matrix and Tensor Derivatives/images/Vector Matrix and Tensor Derivatives/graph2.jpg" class="full-image">
 <p>由上处理可知，一个长的链式处理函数可以通过 $w$，$x$之间的点乘获得计算结果。这个函数被称作为Sigmoid函数$\partial (x)$.这个函数的偏导可以采用一下方法求得：</p>
 <p>$$\partial (x)=\frac{1}{1+e^x}$$</p>
 <p>$$\rightarrow\frac{d\partial(x)}{dx}=\frac{e^{-x}}{(1+e^{-x})^2}=(\frac{1+e^{-x}-1}{1+e^{-x}})(\frac{1}{1+e^{-x}})=(1-\partial(x))(\partial(x))$$</p>
@@ -207,7 +207,7 @@
 <li>累加：正向传播过程多次使用 $x$、 $y$ 计算过程中需要注意+=、=等操作符，避免覆盖之前的旧值；</li>
 </ol>
 <h1 id="反向传播模式"><a href="#反向传播模式" class="headerlink" title="反向传播模式"></a>反向传播模式</h1><p>有趣的是反向传播通常可以以一种直观的方式阐述。例如神经网络中常用的三种计算（add、mul、max），在反向传播过程中都可以简单的阐述。让我们看一下一下的例子：</p>
-<img src="/images/Vector Matrix and Tensor Derivatives/graph3.jpg" class="full-image">
+<img src="/2017/08/06/Vector Matrix and Tensor Derivatives/images/Vector Matrix and Tensor Derivatives/graph3.jpg" class="full-image">
 <p>通过上图可知：<br><strong>加法操作</strong> 的梯度均匀分配给所有输入变量，不用管正向传播过程中的值。因为加法操作的局部梯度都是 $+1.0$，x*1.0保持不变，因此输出的梯度完全等于输入时的梯度。本例加法操作的梯度将2.0的局部梯度传递给两个输入变量，均保持不变；<br><strong>max操作</strong>与加法操作不一样，max操作将梯度传递给输入值大的。本例中因为 $1.0$大于 $-1$，所以在z出的梯度为 $2$，在w出的值为 $0$；<br><strong>乘法操作</strong>解释起来相对复杂一点。局部梯度输入值是根据链式法则来确定梯度的输出。在本例中 $x$的梯度为 $-4.00*2.00=-8.0$；</p>
 <p>不直观的影响以及他们的影响。请注意，如果乘法操作的其中一个输入非常小，而另外一个输入非常大，那么乘法处理就会出现如下现象，它将为小的输入分配一个较大的梯度，并为一个大的数据分配一个较小的梯度。在线下分类器权重和输入点的乘积$W^TX_i$中，意味着数据集的大小对梯度有较大的影响。例如，如果在预处理期间将数据$X_i*1000$意味着梯度也将扩大1000倍，所以必须通过降低学习率来补偿。</p>
 <h1 id="梯度计算中的向量运算"><a href="#梯度计算中的向量运算" class="headerlink" title="梯度计算中的向量运算"></a>梯度计算中的向量运算</h1><p>之前提的都是单个变量的处理，不过所有这些操作都适合于矩阵和向量计算。然是，在处理过程中需要注意维度。</p>
@@ -302,16 +302,16 @@
       <content type="html"><![CDATA[<h1 id="atom编辑器"><a href="#atom编辑器" class="headerlink" title="atom编辑器"></a>atom编辑器</h1><h2 id="总体介绍"><a href="#总体介绍" class="headerlink" title="总体介绍"></a>总体介绍</h2><p>此前，我一直使用OneNote作为电子笔记本，大概使用一年左右，笔记的量比较大之后，OneNote就出出现卡顿的情况。当然我也探索过其他笔记管理软件，一直未找到一款让我满意的笔记管理软件。直到我碰到Atom编辑器，一开始接触Atom这个编辑器（ <a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> ），就深深的吸引了我。当晚，我探索这个编辑器的使用直到晚上2点多，还未有睡意。</p>
 <p>那它有哪些吸引人的特性，接下来我就介绍一下Atom的总体特性。Atom编辑器支持Windows、Mac、Linux三大桌面平台，完全免费，并且已经在GitHub上开放全部的源代码。Atom采用类似Sublime的包管理功能，支持插件扩展，可配置性非常高，可以根据自身的使用特点，按照不同的插件。Atom有着各种流行编辑器都有的特性，功能上非常丰富，支持各种编程语言的代码高亮（HTML / CSS / Javascript / PHP / Python / C / C++ / Objective C / Java / JSON / Perl / CoffeeScript / Go / Sass / YAML / Markdown 等等）和代码补全功能，极大的提高了编程效率。具有项目管理、git代码管理等特性。采用文档管理的形式管理，这就不会出现笔记越多，编辑器就运行越慢。</p>
 <p><strong> 注 </strong> 测试过100M左右的文件打开和编辑 ，反应速度确实比sublime要慢很多。大文件操作建议sublime操作，sublime编辑丢失的可能比较小，atom卡死后编辑会丢失。个人比较喜欢的是atom的插件和界面风格的简约，一般也不会编辑几十M的文件。</p>
-<p>先上一个页面直观感受一下：<br><img src="/images/atom编辑器/graph1.jpg" class="full-image"></p>
+<p>先上一个页面直观感受一下：<br><img src="/2017/04/26/atom编辑器/images/atom编辑器/graph1.jpg" class="full-image"></p>
 <h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><p>Atom编辑器连接地址：<a href="https://atom.io/" target="_blank" rel="external">https://atom.io/</a> 常见的使用功能和其他软件类似，本文就不做具体介绍。<br>本文主要介绍一下几点：</p>
 <ol>
 <li>插件添加 Atom -&gt; Preferences（Settings） -&gt; install 搜索需要按照的插件，找到后直接按照就ok。在Settings里面可以对已安装的插件进行管理。点击对应的插件，可以查看插件的功能说明和使用说明，其中包括常用的快捷键。对于之前安装好的插件，可以在package里面查找，点击插件同样可以查看使用说明。（如果不能安装，可以git上下载包放入~/.atom/packages目录，志辰提供），不适用的插件可以停了，加快atom的运行速度。</li>
 </ol>
-<img src="/images/atom编辑器/graph2.jpg" class="full-image">
+<img src="/2017/04/26/atom编辑器/images/atom编辑器/graph2.jpg" class="full-image">
 <ol>
 <li>快捷键的修改 Atom -&gt; Preferences（Settings） -&gt; KeyBindings 先找到需要修改的快捷键或者插件，然后点击快捷键前的复制按钮，最后将复制的代码粘贴到（your keymap file）。对于快捷键不要重复，重复可能导致快捷键无法使用。</li>
 </ol>
-<img src="/images/atom编辑器/graph3.jpg" class="full-image">
+<img src="/2017/04/26/atom编辑器/images/atom编辑器/graph3.jpg" class="full-image">
 <h2 id="常用插件"><a href="#常用插件" class="headerlink" title="常用插件"></a>常用插件</h2><h3 id="markdown-preview"><a href="#markdown-preview" class="headerlink" title="markdown-preview"></a>markdown-preview</h3><p>MarkDown文本预览器，有了这款插件可以把atom变成写markdown的神器。</p>
 <h3 id="markdown-scroll-sync"><a href="#markdown-scroll-sync" class="headerlink" title="markdown-scroll-sync"></a>markdown-scroll-sync</h3><p>markdown-scroll-sync将预览和编辑窗口同步滑动。</p>
 <h3 id="file-type-icons"><a href="#file-type-icons" class="headerlink" title="file-type-icons"></a>file-type-icons</h3><p>为各种不同的文件类型显示一个漂亮的ICON</p>
@@ -320,7 +320,7 @@
 <h3 id="markdown-image-paste"><a href="#markdown-image-paste" class="headerlink" title="markdown-image-paste"></a>markdown-image-paste</h3><p>图片、截屏粘贴。默认快捷键ctrl-v；</p>
 <h3 id="markdown-pdf"><a href="#markdown-pdf" class="headerlink" title="markdown-pdf"></a>markdown-pdf</h3><p>支持查看pdf文件</p>
 <h3 id="markdown-table-editor"><a href="#markdown-table-editor" class="headerlink" title="markdown-table-editor"></a>markdown-table-editor</h3><p>一直对Markdown的table语法很无爱，直到遇到了markdown-table-editor，这操作效率简直炸了！文字已经不能表达我的激动之情了，直接看图吧。编辑完以后自动对齐。</p>
-<img src="/images/atom编辑器/graph4.jpg" class="full-image">
+<img src="/2017/04/26/atom编辑器/images/atom编辑器/graph4.jpg" class="full-image">
 <p>Atom有许多各种各样的插件，用户根据自己的需求，安装对应的插件。</p>
 <p>最近因为使用atom，又研究了一下sublime的一些插件，发现sublime有很多功能未发现。atom相对是使用上还是比较卡，建议采用sublime。sublime的使用方法和atom类似，可以通过安装插件和设置增强sublime的功能。</p>
 <p>下面添加一下sublime的常用插件：</p>
@@ -390,12 +390,12 @@
 <li>如果XOR的值不为0，计算XOR后前置0和尾部0的值，存储bit ‘1’，然后存储a）或b）：<br>&emsp; a)控制位’0’，如果meaning值的bit块落在之前meaning值的bit块内，（当前块前置0和后置0的个数与之前值的个数一样），存储meaning值的bit块；<br>&emsp; b)控制位’1’，否则，采用5bit存储前置0的位置值，然后采用6bit存储XOR后的meaning值；</li>
 </ol>
 <p>如<strong> 图1. </strong> 采用值压缩算法得：$T_1$时刻的值$Value_1$ 12 直接存储；$T_2$时刻的值$Value_2$ 12与$T_1$时刻的值$Value_1$ 12的差值$deltaV_2$ 0，所以直接存储标记位’0’；因为$T_2$时刻没有有meaning值，所以   $T_3$时刻的值$Value_3$ 24 与$T_2$ 时刻的值做XOR运算，存储控制为’11’,然后采用5bit存储XOR值的第一个bit位为1的值11，接着采用6 bit存储XOR后meaning值的bit的长度1，最后存储meaning值的bit块。（如果XOR之后的Meaning块落在之前XOR后的Meaning块内，则存储控制位’10’，然后存储Meaning值的bit块）</p>
-<img src="/images/Beringei时序数据库/graph1.png" class="full-image" title="图1. 压缩算法">
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph1.png" class="full-image" title="图1. 压缩算法">
 <p>采用以上两个算法压缩Facebook的监控数据，可知压缩比极高。<br>时间戳压缩算法，得到各标志位的分布比例如图2。96%的时间戳可以用1bit存储，压缩比极高。</p>
-<img src="/images/Beringei时序数据库/graph2.png" class="full-image" title="图2. 时间戳压缩算法各bit位分布比">
-<p>分体值压缩算法，得到各标志位的分布比例如图3。其中标志位’0’占1bit占比51%，标志位’10’的值占26.6bit占比30%，标志位’11’占36.9bit占比19%。<br><img src="/images/Beringei时序数据库/graph3.png" class="full-image" title="图3. 值压缩算法各bit位分布比"></p>
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph2.png" class="full-image" title="图2. 时间戳压缩算法各bit位分布比">
+<p>分体值压缩算法，得到各标志位的分布比例如图3。其中标志位’0’占1bit占比51%，标志位’10’的值占26.6bit占比30%，标志位’11’占36.9bit占比19%。<br><img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph3.png" class="full-image" title="图3. 值压缩算法各bit位分布比"></p>
 <h3 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h3><p>每两小时产生一个Block块。ShardMap为Vector存储Block块的key和TSmap的地址映射关系。TSmap存储所shards Block块地址和key的映射关系，这样就可以快速复制内存中的数据。Facebook内存存储结构，当无头的数据块还没有刷新时宕机，数据将会丢失。当然，内存数据同样需要持久化硬盘上，当块形成后，Facebook采用Hbase持久化内存数据块。</p>
-<img src="/images/Beringei时序数据库/graph4.png" class="full-image" title="图4. 值压缩算法各bit位分布比">
+<img src="/2017/03/13/Beringei时序数据库/images/Beringei时序数据库/graph4.png" class="full-image" title="图4. 值压缩算法各bit位分布比">
 <h2 id="Beringei总结"><a href="#Beringei总结" class="headerlink" title="Beringei总结"></a>Beringei总结</h2><p>虽然Beringei算法简单，压缩比和性能都有较大的提高，但是采用Beringei存储监控数据需要case by case的分析业务场景，只有业务场景和Beringei设计原则吻合才能达到较好的压缩比。其次，Beringei部署需要依赖较多的其他框架，部署环境不友好，且Beringei需要持久化数据库支撑。</p>
 <h3 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h3><p><a href="http://www.vldb.org/pvldb/vol8/p1816-teller.pdf" target="_blank" rel="external">Gorilla论文地址</a><br><a href="https://github.com/facebookincubator/beringei" target="_blank" rel="external">Beringei代码库</a><br><a href="https://yq.aliyun.com/articles/69354" target="_blank" rel="external">深度解读Facebook刚开源的beringei时序数据库</a><br><a href="http://weixin.niurenqushi.com/article/2017-02-12/4766476.html" target="_blank" rel="external">Facebook开源内存数据库Beringei，追求极致压缩率</a><br><a href="http://www.cnblogs.com/mlog/archive/2010/12/16/2456368.html" target="_blank" rel="external">浮点数标示方法：fast lossless compression of scientific floating-point data</a></p>
 ]]></content>
@@ -461,7 +461,7 @@
 <p> ###### Header 6</p>
 <p>### Links and Email</p>
 <p>#### Inline</p>
-<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#x6d;&#97;&#x69;&#108;&#116;&#x6f;&#58;&#x75;&#114;&#97;&#110;&#117;&#x73;&#x6a;&#x72;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#46;&#x63;&#111;&#x6d;&#92;">&#x75;&#114;&#97;&#110;&#117;&#x73;&#x6a;&#x72;&#x40;&#x67;&#109;&#x61;&#x69;&#x6c;&#46;&#x63;&#111;&#x6d;&#92;</a></p>
+<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#109;&#x61;&#x69;&#108;&#116;&#111;&#58;&#117;&#114;&#x61;&#x6e;&#x75;&#x73;&#106;&#x72;&#x40;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;&#92;">&#117;&#114;&#x61;&#x6e;&#x75;&#x73;&#106;&#x72;&#x40;&#103;&#x6d;&#97;&#105;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;&#92;</a></p>
 <p><code>\&lt;uranusjr@gmail.com\&gt;</code></p>
 <p>Same thing with urls: \<a href="http://macdown.uranusjr.com\" target="_blank" rel="external">http://macdown.uranusjr.com\</a></p>
 <p><code>\&lt;http://macdown.uranusjr.com\&gt;</code></p>
@@ -693,31 +693,31 @@ git pull origin master过程中出现一下错误
       <title><![CDATA[数据系统架构之Lambda architecture]]></title>
       <url>/2016/06/28/%E6%95%B0%E6%8D%AE%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E4%B9%8BLambda%20architecture/</url>
       <content type="html"><![CDATA[<h1 id="传统系统的问题"><a href="#传统系统的问题" class="headerlink" title="传统系统的问题"></a>传统系统的问题</h1><p>“我们正在从IT时代走向DT时代(数据时代)。IT和DT之间，不仅仅是技术的变革，更是思想意识的变革，IT主要是为自我服务，用来更好地自我控制和管理，DT则是激活生产力，让别人活得比你好”——阿里巴巴董事局主席马云。</p>
-<p>数据量从M的级别到G的级别到现在T的级、P的级别。数据量的变化，数据管理系统（DBMS）和数仓系统（DW）也在悄然的变化着。<br>传统应用的数据系统架构设计时，应用直接访问数据库系统。当用户访问量增加时，数据库无法支撑日益增长的用户请求的负载时，从而导致数据库服务器无法及时响应用户请求，出现超时的错误。出现这种情况以后，在系统架构上就采用图（A）的架构，在数据库和应用中间过一层缓冲隔离，缓解数据库的读写压力。<br><img src="/images/数据系统架构之Lambda architecture/graph1.png" class="full-image" title="图（A）"><br>然而，当用户访问量持续增加时，就需要考虑读写分离技术（Master－Slave）架构如图（B），分库分表技术。现在，架构变得越来越复杂了，增加队列、分区、复制等处理逻辑。应用程序需要了解数据库的schema，才能访问到正确的数据。<br><img src="/images/数据系统架构之Lambda architecture/graph2.png" class="full-image" title="图（B）"> </p>
+<p>数据量从M的级别到G的级别到现在T的级、P的级别。数据量的变化，数据管理系统（DBMS）和数仓系统（DW）也在悄然的变化着。<br>传统应用的数据系统架构设计时，应用直接访问数据库系统。当用户访问量增加时，数据库无法支撑日益增长的用户请求的负载时，从而导致数据库服务器无法及时响应用户请求，出现超时的错误。出现这种情况以后，在系统架构上就采用图（A）的架构，在数据库和应用中间过一层缓冲隔离，缓解数据库的读写压力。<br><img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph1.png" class="full-image" title="图（A）"><br>然而，当用户访问量持续增加时，就需要考虑读写分离技术（Master－Slave）架构如图（B），分库分表技术。现在，架构变得越来越复杂了，增加队列、分区、复制等处理逻辑。应用程序需要了解数据库的schema，才能访问到正确的数据。<br><img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph2.png" class="full-image" title="图（B）"> </p>
 <h1 id="Lambda架构的背景"><a href="#Lambda架构的背景" class="headerlink" title="Lambda架构的背景"></a>Lambda架构的背景</h1><p>大数据处理技术需要解决这种可伸缩性与复杂性。<br>首先要认识到这种分布式的本质，要很好地处理分区与复制，不会导致错误分区引起查询失败，而是要将这些逻辑内化到数据库中。当需要扩展系统时，可以非常方便地增加节点，系统也能够针对新节点进行rebalance。<br>其次是要让数据成为不可变的。原始数据永远都不能被修改，这样即使犯了错误，写了错误数据，原来好的数据并不会受到破坏。<br>Storm的作者Nathan Marz提出的一个实时大数据处理框架（Lambda架构）就满足以上两点。Marz在Twitter工作期间开发了著名的实时大数据处理框架Storm，Lambda架构是其根据多年进行分布式大数据系统的经验总结提炼而成。<br>Lambda架构的目标是设计出一个能满足实时大数据系统关键特性的架构，包括有：高容错、低延时和可扩展等。Lambda架构整合离线计算和实时计算，融合不可变性（Immunability），读写分离和复杂性隔离等一系列架构原则，可集成Hadoop，Kafka，Storm，Spark，Hbase等各类大数据组件。</p>
 <h1 id="大数据系统的关键特性"><a href="#大数据系统的关键特性" class="headerlink" title="大数据系统的关键特性"></a>大数据系统的关键特性</h1><p>Marz介绍Big Data System许具备的属性：<br>a、Robust and fault-tolerant（容错性和鲁棒性）：对大规模分布式系统来说，机器是不可靠的，可能会当机，但是系统需要是健壮、行为正确的，即使是遇到机器错误。除了机器错误，人更可能会犯错误。在软件开发中难免会有一些Bug，系统必须对有Bug的程序写入的错误数据有足够的适应能力，所以比机器容错性更加重要的容错性是人为操作容错性。对于大规模的分布式系统来说，人和机器的错误每天都可能会发生，如何应对人和机器的错误，让系统能够从错误中快速恢复尤其重要。<br>b、Low latency reads and updates（低延时）：很多应用对于读和写操作的延时要求非常高，要求对更新和查询的响应是低延时的。<br>c、Scalable（横向扩容）：当数据量/负载增大时，可扩展性的系统通过增加更多的机器资源来维持性能。也就是常说的系统需要线性可扩展，通常采用scale out（通过增加机器的个数）而不是scale up（通过增强机器的性能）。<br>d、General（通用性）：系统需要能够适应广泛的应用，包括金融领域、社交网络、电子商务数据分析等。<br>e、Extensible（可扩展）：需要增加新功能、新特性时，可扩展的系统能以最小的开发代价来增加新功能。<br>f、Allows ad hoc queries（方便查询）：数据中蕴含有价值，需要能够方便、快速的查询出所需要的数据。<br>d、Minimal maintenance（易于维护）：系统要想做到易于维护，其关键是控制其复杂性，越是复杂的系统越容易出错、越难维护。<br>h、Debuggable（易调试）：当出问题时，系统需要有足够的信息来调试错误，找到问题的根源。其关键是能够追根溯源到每个数据生成点。</p>
 <h1 id="数据系统的本质"><a href="#数据系统的本质" class="headerlink" title="数据系统的本质"></a>数据系统的本质</h1><p>Marz认为：数据系统通过查询过去的（部分、全部）数据去回答问题。如：他是一个什么样的人？他有多少朋友？这个账号是否收支平衡？。因此，Data System的通用定义为：<br>Query ＝ Function（all data）。<br>对通用的表达式进行分解得到：<br>数据系统 ＝ 数据 ＋ 查询<br>从而可以从数据和查询两个方面认识大数据系统的本质。</p>
 <h2 id="数据本本质：When-amp-What"><a href="#数据本本质：When-amp-What" class="headerlink" title="数据本本质：When&amp;What"></a>数据本本质：When&amp;What</h2><p>数据是一个不可分割的单元，数据有两个关键的特性：When 和 What。<br>When是只数据是与时间相关的，也就是数据是在某个时间产生的。这个非常重要，在具有事务特性的数据库中，操作的先后顺序对结果至关重要。例如数据库的Binlog日志。因此，数据的时间性质决定了数据的全局发生先后，也就决定了数据的结果。<br>What是只数据的本身。由于数据跟某个时间点相关，所以数据的本身是不可变的(immutable)，过往的数据已经成为事实（Fact），你不可能回到过去的某个时间点去改变数据事实。这也就意味着对数据的操作其实只有两种：读取已存在的数据和添加更多的新数据。采用数据库的记法，CRUD就变成了CR，Update和Delete本质上其实是新产生的数据信息，用C来记录。</p>
 <h2 id="数据的存储：Store-Everything-Rawly-and-Immutably"><a href="#数据的存储：Store-Everything-Rawly-and-Immutably" class="headerlink" title="数据的存储：Store Everything Rawly and Immutably"></a>数据的存储：Store Everything Rawly and Immutably</h2><p>根据上述对数据特性的分析，lambda架构中对数据的存储采用的方式是：数据不可变，存储所有数据。<br>采用这两种方式存储的好处：<br>a、简单。采用不可变的数据模型，存储数据时只需要简单的往主数据集后追加数据即可。相比于采用可变的数据模型，为了Update操作，数据通常需要被索引，从而能快速找到要更新的数据去做更新操作。<br>b、应对人为和机器的错误。人和机器每天都可能会出错，如何应对人和机器的错误，让数据系统快速恢复极其重要。不可变和可重复计算是应对认为和机器错误的常用方法。采用可变数据模型，引发错误的数据有可能被覆盖而丢失。相比于采用不可变的数据模型，因为所有的数据都在，引发错误的数据也在。修复的方法就可以简单的是遍历数据集上存储的所有的数据，丢弃错误的数据，重新计算得到Views。重新计算的关键点在于利用数据的时间特性决定的全局次序，依次顺序重新执行，必然能得到正确的结果。<br>当前业界有很多采用不可变数据模型来存储所有数据的例子。比如分布式数据库Datomic，基于不可变数据模型来存储数据，从而简化了设计。分布式消息中间件Kafka，基于Log日志，以追加append-only的方式来存储消息。</p>
 <h1 id="Lambda架构"><a href="#Lambda架构" class="headerlink" title="Lambda架构"></a>Lambda架构</h1><p>Lambda架构的主要思想是将大数据系统架构为多层个层次，分别为批处理层（batch layer）、实时处理层（speed layer）、服务层（serving layer）如图（C）。<br>理想状态下，任何数据访问都可以从表达式Query = function(all data)开始，但是，若数据达到相当大的一个级别（例如PB），且还需要支持实时查询时，就需要耗费非常庞大的资源。一个解决方式是预运算查询函数（precomputed query funciton）。书中将这种预运算查询函数称之为Batch View（A），这样当需要执行查询时，可以从Batch View中读取结果。这样一个预先运算好的View是可以建立索引的，因而可以支持随机读取（B）。于是系统就变成：<br>（A）batch view = function(all data)；<br>（B）query = function(batch view)。</p>
-<img src="/images/数据系统架构之Lambda architecture/graph3.png" class="full-image" title="图（B）"> 
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph3.png" class="full-image" title="图（B）"> 
 <h2 id="Batch-Layer"><a href="#Batch-Layer" class="headerlink" title="Batch Layer"></a>Batch Layer</h2><p>在Lambda架构中，实现（A）batch view = function(all data)的部分称之为Batch Layer。他承担两个职责：<br>a、存储Master Dataset，这是一个不变的持续增长的数据集<br>b、针对这个Master Dataset进行预运算<br>在全体数据集上在线运行查询函数得到结果的代价太大，同时处理查询时间过长，导致用户体验不好。如果我们预先在数据集上计算并保存预计算的结果，查询的时候直接返回预计算的结果，而无需重新进行复制耗时的计算。显然，batch view 是一个批处理过程，如采用Hadoop或spark支持的map－reduce方式。采用这种方式计算得到的每个view都支持再次计算，且每次计算的结果都相同。</p>
-<img src="/images/数据系统架构之Lambda architecture/graph4.png" class="full-image" title="图（D）"> 
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph4.png" class="full-image" title="图（D）"> 
 <p>对View的理解：<br>View是一个和业务关联性比较大的概念，View的创建需要从业务自身的需求出发。一个通用的数据库查询系统，查询对应的函数千变万化，不可能穷举。但是如果从业务自身的需求出发，可以发现业务所需要的查询常常是有限的。Batch Layer需要做的一件重要的工作就是根据业务的需求，考察可能需要的各种查询，根据查询定义其在数据集上对应的Views。<br>Batch Layer的Immutable data模型和Views<br>如图（E）坐席（agentid＝50023）的人，在10:00:06分的时候，状态是calling，在10:00:10的时候状态为waiting。在传统的数据库设计中，直接后面的纪录覆盖前面的纪录，而在Immutable 数据模型中，不会对原有数据进行更改，而是采用插入修改纪录的形式更改历史纪录。</p>
-<img src="/images/数据系统架构之Lambda architecture/graph5.png" class="full-image" title="图（E）">
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph5.png" class="full-image" title="图（E）">
 <p>上文所提及的View是图（E）中预先计算得到的相关视图，例如：2016-06-21当天所有上线的agent数，每条热线、公司下上线的Agent数。根据业务需要，预先计算出结果。此过程相当于传统数仓建模的应用层，应用层也是根据业务场景，预先加工出的view。<br>Speed Layer</p>
 <p>Batch Layer能够很好的处理离线数据，但是在很多场景数据不断产生，并且业务场景需要实时查询。Speed Layer就是设计用来处理增量实时数据。<br>Speed Layer和Batch Layer比较类似，对数据进行计算并生成Realtime View，其主要的区别在于：<br>a、Speed Layer处理的数据是最近的增量数据流，Batch Layer处理的是全体数据集<br>b、Speed Layer为了效率，接收到新数据及时更新Realtime View，而Batch Layer根据全体离线数据直接得到Batch View。Speed Layer是一种增量计算，而非重新计算（recomputation）。<br>c、Speed Layer因为采用增量计算，所以延迟小，而Batch Layer是全数据集的计算，耗时比较长。<br>综上所诉，Speed Layer是Batch Layer在实时性上的一个补充。如图（F）</p>
-<img src="/images/数据系统架构之Lambda architecture/graph6.png" class="full-image" title="图（F）">
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph6.png" class="full-image" title="图（F）">
 <p>Speed Layer可总结为以（C）Realtime View ＝ function（Realtime View， new data）；<br>Lambda Architecture将数据处理分解为Batch Layer 和Speed Layer有如下优点：<br>a、容错性：Speed Layer中处理的数据不断写入Batch Layer，当Batch Layer中重新计算数据集包含Speed Layer处理的数据集后，当前的Realtime View就可以丢弃，这就意味着Speed Layer处理中引入的错误，在Batch Layer重新计算时都可以得到修证。这点也可以看成时CAP理论中的最终一致性（Eventual Consistency）的体现。<br>b、复杂性隔离。Batch Layer处理的是离线数据，可以很好的掌控。Speed Layer采用增量算法处理实时数据，复杂性比Batch Layer要高很多。通过分开Batch Layer和Speed Layer，把复杂性隔离到Speed Layer，可以很好的提高整个系统的鲁棒性和可靠性。<br>Serving Layer</p>
 <p>Batch Layer通过对Master Dataset执行查询获得Batch View，Speed Layer通过增量计算提供Realtime View。Lambda架构的Serving Layer用于响应用户的查询请求，合并Batch View和Realtime View中的结果数据集到最终的数据集，如图（G）。因此，Serving Layer的职责包含：<br>a、对batch View和RealTime View的随机访问<br>b、更新Batch Veiw和RealTime View，并负责结合两者的数据，对用户提供统一的接口</p>
-<img src="/images/数据系统架构之Lambda architecture/graph7.png" class="full-image" title="图（G）"> 
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph7.png" class="full-image" title="图（G）"> 
 <p>综上所诉，Serving Layer采用如下等式（D）表示：Query ＝ function（Batch Views， Realtime View）。<br>Lambda 架构组件选型</p>
 <p>下图给出了Lambda架构中各组件在大数据生态系统中和阿里集团的常用组件。数据流存储选用不可变日志的分布式系统Kafa、TT、Metaq；Batch Layer数据集的存储选用Hadoop的HDFS或者阿里云的ODPS；Batch View的加工采用MapReduce；Batch View数据的存储采用Mysql（查询少量的最近结果数据）、Hbase（查询大量的历史结果数据）。Speed Layer采用增量数据处理Storm、Flink；Realtime View增量结果数据集采用内存数据库Redis。</p>
-<img src="/images/数据系统架构之Lambda architecture/graph8.png" class="full-image" title="图（H）"> 
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph8.png" class="full-image" title="图（H）"> 
 <p>Lambda是一个通用框架，各模块选型不要局限于上面给出的组件，特别是view的选型。因为View是和各业务关联非常大的概念，View选择组件时要根据业务的需求，选择最合适的组件。<br>Lambda架构的评估</p>
 <p>优点：<br>a、数据的不可变性。里面给出的数据传输模型是在初始化阶段对数据进行实例化，这样的做法是能获益良多的。能够使得大量的MapReduce工作变得有迹可循，从而便于在不同阶段进行独立调试。<br>b、强调了数据的重新计算问题。在流处理中重新计算是个主要挑战，但是经常被忽视。比方说，某工作流的数据输出是由输入决定的，那么一旦代码发生改动，我们将不得不重新计算来检视变更的效度。什么情况下代码会改动呢？例如需求发生变更，计算字段需要调整或者程序发出错误，需要进行调试。<br>缺点：<br>a、Jay Kreps认为Lambda包含固有的开发和运维的复杂性。Lambda需要将所有的算法实现两次，一次是为批处理系统，另一次是为实时系统，还要求查询得到的是两个系统结果的合并。</p>
 <p>由于存在以上缺点，Linkedin的Jay kreps提出了Kappa架构如图（I）：</p>
-<img src="/images/数据系统架构之Lambda architecture/graph9.png" class="full-image" title="图（I）"> 
+<img src="/2016/06/28/数据系统架构之Lambda architecture/images/数据系统架构之Lambda architecture/graph9.png" class="full-image" title="图（I）"> 
 <p>1、使用Kafka或其它系统来对需要重新计算的数据进行日志记录，以及提供给多个订阅者使用。例如需要重新计算30天内的数据，我们可以在Kafka中设置30天的数据保留值。<br>2、当需要进行重新计算时，启动流处理作业的第二个实例对之前获得的数据进行处理，之后直接把结果数据放入新的数据输出表中。<br>3、当作业完成时，让应用程序直接读取新的数据记录表。<br>4、停止历史作业，删除旧的数据输出表。</p>
 <p>Kappa架构暂时未做深入了解，在此不做评价。我个人觉得，不同的数据架构有各自的优缺点，我们使用的时候只能根据应用场景，选择更合适的架构，才能扬长避短。</p>
 <p>参考资料：</p>
@@ -747,7 +747,7 @@ git pull origin master过程中出现一下错误
       <content type="html"><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>在大数据与云计算发展的时代，我们经常会碰到这样的问题。我们是否能高效的判断一个用户是否访问过某网站的主页（每天访问量上亿）或者需要统计网站的pv、uv。最直接的想法是将所有的访问者存起来，然后每次用户访问的时候与之前集合进行比较。不管是将访问信息存在内存（或数据库）都会对服务器造成非常大的压力。那是否存在一种方式，容忍一定的错误率，高效（计算复杂度、空间复杂度）的实现访问量信息的跟踪、统计呢？接下来介绍的布隆过滤器（Bloom Filter）就可以满足当前的使用场景（注释：基数计数法同样能满足pv、uv的统计）。</p>
 <h1 id="布隆过滤器简介"><a href="#布隆过滤器简介" class="headerlink" title="布隆过滤器简介"></a>布隆过滤器简介</h1><p>布隆过滤器（Bloom Filter）是1970年由布隆提出的一种空间空间效率很高的随机数据结构，它利用位数组很简洁地表示一个集合，并判断一个元素是否属于这个集合。使用布隆过滤器，存在第一类出错（False positive ），但是不会存在第二类错误（False negative），因此，布隆过滤器拥有100%的召回率。也就是说，布隆过滤器能够准确判断一个元素不在集合内，但只能判断一个元素可能在集合内。因此，Bloom Filter不适合“零错误”的应用场合。在能够容忍低错误的应用场合下，Bloom Filter通过极少的错误换取了存储空间的极大节省。我们可以向布隆过滤器里添加元素，但是不能从中移除元素（普通布隆过滤器，增强的布隆过滤器是可以移除元素的）。随着布隆过滤器中元素的增加，犯第一类错误的可能性也随之增大。</p>
 <h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><p>一个空的布隆过滤器有长度为M比特的bit数组构成，且所有位都初始化0。一个元素通过K个不同的hash函数随机散列到bit数组的K个位置上，K必须远小于M。K和M的大小由错误率（false positive rate）决定。</p>
-<img src="/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
+<img src="/2016/05/26/Bloom filter(布隆过滤器)概念与原理/images/Bloom filter(布隆过滤器)概念与原理/graph1.png" class="full-image">
 <p>Bloom Filter 的一个例子集合{ x, y, z }。带有颜色的箭头表示元素经过 $k（k＝3）$ hash函数的到在M（bit数组）中的位置。元素W不在S集合中，因为元素W经过k个hash函数得到在M（bit数组）的k个位置中存在值为0的位置。<br>向集合S中添加元素x：x经过k个散列函数后，在M中得到k个位置，然后，将这k个位置的值设置为1。<br>判断x元素是否在集合S中：x经过k个散列函数后，的到k个位置的值，如果这k个值中间存在为0的，说明元素x不在集合中——元素x曾经插入到过集合S，则M中的k个位置会全部置为1；如果M中的k个位置全为1，则有两种情形。情形一：这个元素在这个集合中；情形二：曾经有元素插入的时候将这k个位置的值置为1了（第一类错误产生的原因False Positive）。简单的布隆过滤器无法区分这两种情况，在增强版中解决了这个问题。<br>设计k个相互独立的hash函数可能工作量比较大，但是一个好的hash函数是降低误判率的关键。一个良好的hash函数应该有宽输出，他们之间的冲突应尽量低，这样k个hash函数能静可能的将值hash的更多的位置。hash函数的设计是我们可以将k个不同的值$\left (0, 1, \cdots , k - 1  \right )$ 作为参数传入，或者将它们加入主键中。对于大的M或者k，hash函数之间的独立性对误判率影响非常大（(Dillinger &amp; Manolios (2004a), Kirsch &amp; Mitzenmacher (2006))）,Dillinger在k个散列函数中，多次使用同一个函数散列，分析对误判率的影响。<br>对于简单布隆过滤器来说，从集合S中移除元素x是不可能的，且false negatives不允许。元素散列到k个位置，尽管可以 将这k个位置的值置为0来移除这个元素，但是这同事也移除了那些散落后，有值落在这k位中的元素。因此，没有一种方法可以判断移除这个元素后是否影响其它已经加入集合中的元素，将k个位置置为0会引入二类误差（false negative）。</p>
 <h2 id="时间复杂度和空间复杂度"><a href="#时间复杂度和空间复杂度" class="headerlink" title="时间复杂度和空间复杂度"></a>时间复杂度和空间复杂度</h2><p>在false positives的情况下，布隆过滤器相比其它的集合（平衡二叉树、树、hash表、数组、链表）只需要少量的存储空间。布隆过滤器的添加和检查元素是否在集合内的复杂度为O(K)。Hash表的平均复杂度比布隆过滤器更低。Bloom 过滤器在误差最优的情况下，平均每个元素大概是1.44bit。</p>
 <h2 id="错误率估计"><a href="#错误率估计" class="headerlink" title="错误率估计"></a>错误率估计</h2><p>布隆过滤器判断一个元素是否属于它表示的集合时会存在已定的错误率（false positive rate），接下来就估计错误率的大小。在估计误差前，我们假设$kn &lt; m$(k哈希函数的个数，n集合中元素的个数，m bit数组的长度）且哈希函数之间时相互独立的，哈希函数散列的bit数组M中的位置时完全随机的。<br>一个长度为m的bit数组，元素在插入时经过一次哈希散列后bit数组的某个位置的值没有被置为1的概率为<br>$$1-\frac{1}{m}$$<br>经过k个哈希函数散列后，还未被置为1的概率为<br>$$(1-\frac{1}{m})^{k}$$<br> 如果插入n个元素后，该位置还未被置为1的概率为<br> $$(1-\frac{1}{m})^{kn}$$<br> 所以被置为1的概率为<br>$$1-(1-\frac{1}{m})^{kn}$$<br>现在判断一个元素是否在结合中，经过k个函数散列到k个bit数组的不同位置。所有这些位置的值为1的概率——误判率。<br>$$(1-\left [ 1-\frac{1}{m} \right ]^{kn})^{k} \approx (1-e^{\frac{-kn}{m}})^{k}$$<br>这里使用了这个极限<br>$$\lim_{x \to \infty }\left ( 1 - \frac{1}{x} \right )^{-x}=e$$<br>这种计算方法不严格，因为前面假设哈希函数和散列后值的分布是相互独立的。但是，这个假设随着m和n的增大误判率更接近真实的误判率。<br>Mitzenmacher and Upfal 证明无假设情况下的误判率的期望值相同。</p>
