@@ -37,7 +37,7 @@ $$(1-\left [ 1-\frac{1}{m} \right ]^{kn})^{k} \approx (1-e^{\frac{-kn}{m}})^{k}$
 $$\lim_{x \to \infty }\left ( 1 - \frac{1}{x} \right )^{-x}=e$$
 这种计算方法不严格，因为前面假设哈希函数和散列后值的分布是相互独立的。但是，这个假设随着m和n的增大误判率更接近真实的误判率。
 Mitzenmacher and Upfal 证明无假设情况下的误判率的期望值相同。
-## 最优的哈希函数个数
+# 最优的哈希函数个数
 既然布隆过滤器将集合映射到位数组中，那么选多少个hash函数才是错误率最低的情况。这里有两个互斥的理由：如果哈希函数的个数多，那么在对一个不属于集合的元素进行查询时得到0的概率就大；但另一方面，如果哈希函数的个数少，那么位数组中的0就多。为了得到最优的哈希函数个数，我们需要根据上一小节中的错误率公式进行计算。
 $$p = \left( 1 - e^{\frac{kn}{m}}\right)^{k}$$
 两边取自然对数
@@ -46,7 +46,7 @@ $$p = exp \left ( kln \left ( 1 - e^{-\frac{kn}{m}} \right ) \right )$$
 只要g取最小值，p就能取到最小值。由于p＝e^(-nk/m),我们可以将g改写为
 $$g=-\frac{m}{n}ln \left (p \right ) ln \left (1 - p \right )$$
 根据对称法则（对函数进行求导）可以得到当$p＝\frac{1}{2}$时，也就是$k＝ln2*\left (\frac{m}{n} \right )$时，g取得最小值，在这种情况下，最小的错误率$p=\left (\frac{1}{2}  \right )^{k}\approx 0.6185^{\frac{m}{n}}$。p＝1/2对应着位数组中0和1各半。换句话说，想保持错误率低，最好让位数组有一半还空着。
-## 位数组的大小
+# 位数组的大小
 在给定n（集合中元素的个数）和错误率（最优函数个数k的的错误率）的情况下，位数组M的大小计算，在最优k的情况下
 $$p=\left ( 1-e^{-\left ( \frac{m}{n}ln2 \right )\frac{n}{m}} \right )^{\frac{m}{n}ln2}$$
 化简为
@@ -54,11 +54,11 @@ $$lnp = -\frac{m}{n}\left ( ln2 \right )^{2}$$
 得到
 $$m = -\frac{nlnp}{\left ( ln2 \right )^{2}}$$
 这意味着在错误率为p的情况下，布隆过滤器的长度为m才能容纳n个元素（以上计算基于n,m->∞）。
-## 布隆过滤器中元素个数的估算
+# 布隆过滤器中元素个数的估算
 Swamidass & Baldi (2007)给出了布隆过滤器元素个数估算的方法（详细证明方式参考论文）
 $$n^{\ast  } = - \frac{m ln \left [ 1-\frac{X}{m} \right ]}{k}$$
 其中，n*表示布隆过滤元素个数的估算值，m表示布隆过滤器的大小，k表示哈希函数的个数，X表示布隆过滤器位值位1的个数。
-## 布隆过滤器的并和交
+# 布隆过滤器的并和交
 布隆过滤器可以用来估算两个集合之间的并合交。一下给出两个集合之间并的计算方式：
 $$n(A)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( A \right )}{m} \right ]}{k}$$
 $$n(B)^{\ast  } = - \frac{m ln \left [ 1-\frac{n\left ( B \right )}{m} \right ]}{k}$$
@@ -66,12 +66,12 @@ A和B之间的并集的个数为：
 $$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = -\frac{m ln\left [ 1 - \frac{n\left ( A \bigcup B \right )}{m} \right ]}{k}$$
 所以A*与B*之间的交集的个数为：
 $$n\left ( A^{\ast } \bigcup B^{\ast } \right ) = n\left ( A^{\ast } \right ) + n\left ( B^{\ast } \right ) + n\left ( A^{\ast } \bigcup A^{\ast }  \right )$$
-## 布隆过滤的特性
+# 布隆过滤的特性
 布隆过滤器能够容纳任意多的元素（误判率会增加），总是能向布隆过滤器中添加元素，不会报错（Out Memory等）;
 布隆过滤器可以很方便的通过计算机的or \and操作计算两个集合元素之间的交集（intersection）和并集（union）,但是同样影响布隆过滤的准确性。
-## 使用例子
+# 使用例子
 Google bigtable、apache hbase 和 apache cassandra使用bloom过滤器判断是否存在该行（rows）或（colums），以减少对磁盘的访问，提高数据库的访问性能；
 比特币使用布隆过滤判断钱包是否同步OK。
-## 总结
+# 总结
 在计算机这个领域里，我们常常碰到时间换空间\或空间换时间的情况，为了达到某一方面的性能，牺牲另外一方面。Bloom Filter在时间和空间着两者之间引入了另外一个概念——错误率。也就是前文提到的布隆过滤不能准确判断一个元素是否在集合内（类似的设计还有基数统计法）。引入错误率后，极大的节省了存储空间。
 自从Burton Bloom在70年代提出Bloom Filter之后，Bloom Filter就被广泛用于拼写检查和数据库系统中。近一二十年，伴随着网络的普及和发展，Bloom Filter在网络领域获得了新生，各种Bloom Filter变种和新的应用不断出现。可以预见，随着网络应用的不断深入，新的变种和应用将会继续出现，Bloom Filter必将获得更大的发展。
