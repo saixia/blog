@@ -239,7 +239,7 @@ post_wordcount:
 
 # Wechat Subscriber
 wechat_subscriber:
-  enabled: true
+  enabled: false
   qcode: /images/mainseth.png
   description: 扫一扫，用手机访问本站
 
@@ -537,3 +537,7 @@ images: images
 
 # Theme version
 version: 5.1.0
+
+reward_comment: 坚持原创技术分享，您的支持将鼓励我继续创作！
+wechatpay: /images/wechatpay.jpeg
+alipay: /images/alipay.jpeg
