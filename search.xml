@@ -500,7 +500,7 @@
 <p> ###### Header 6</p>
 <p>### Links and Email</p>
 <p>#### Inline</p>
-<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#109;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#117;&#x72;&#97;&#110;&#117;&#115;&#106;&#114;&#64;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#x6f;&#109;&#x5c;">&#117;&#x72;&#97;&#110;&#117;&#115;&#106;&#114;&#64;&#103;&#109;&#97;&#105;&#108;&#x2e;&#99;&#x6f;&#109;&#x5c;</a></p>
+<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#111;&#x3a;&#x75;&#114;&#x61;&#110;&#117;&#115;&#106;&#x72;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#111;&#109;&#92;">&#x75;&#114;&#x61;&#110;&#117;&#115;&#106;&#x72;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#111;&#109;&#92;</a></p>
 <p><code>\&lt;uranusjr@gmail.com\&gt;</code></p>
 <p>Same thing with urls: \<a href="http://macdown.uranusjr.com\" target="_blank" rel="external">http://macdown.uranusjr.com\</a></p>
 <p><code>\&lt;http://macdown.uranusjr.com\&gt;</code></p>
