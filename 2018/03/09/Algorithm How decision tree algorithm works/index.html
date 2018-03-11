@@ -1,0 +1,1307 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Algorithm,Decision tree,算法,决策树," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta name="keywords" content="Algorithm,Decision tree,算法,决策树">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How decision tree algorithm works 转载">
+<meta property="og:url" content="http://saixia.me/2018/03/09/Algorithm How decision tree algorithm works/index.html">
+<meta property="og:site_name" content="Seth&#39;s blog">
+<meta property="og:description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20Algorithm.jpg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20classifier.png">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20tree%20model%20example%20Image.jpg">
+<meta property="og:image" content="http://saixia.me/images/Example%20Construct%20a%20Decision%20Tree%20by%20using%20information%20gain%20as%20a%20criterion.png">
+<meta property="og:image" content="http://saixia.me/images/table1.jpeg">
+<meta property="og:image" content="http://saixia.me/images/table2.jpeg">
+<meta property="og:image" content="http://saixia.me/images/table3.jpeg">
+<meta property="og:image" content="http://saixia.me/images/info_gain_final.jpg">
+<meta property="og:image" content="http://saixia.me/images/Example%20Construct%20a%20Decision%20Tree%20by%20using%20gini%20index%20as%20a%20criterion.png">
+<meta property="og:image" content="http://saixia.me/images/table4.jpeg">
+<meta property="og:image" content="http://saixia.me/images/table5.jpeg">
+<meta property="og:image" content="http://saixia.me/images/gini_final.jpg">
+<meta property="og:updated_time" content="2018-03-11T09:58:32.733Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How decision tree algorithm works 转载">
+<meta name="twitter:description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta name="twitter:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20Algorithm.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":"ture"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://saixia.me/2018/03/09/Algorithm How decision tree algorithm works/"/>
+
+
+
+
+
+  <title> How decision tree algorithm works 转载 | Seth's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  <div style="display: none;">
+    <script src="//s95.cnzz.com/z_stat.php?id=1262332391&web_id=1262332391" language="JavaScript"></script>
+  </div>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Seth's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Seth</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://saixia.me/2018/03/09/Algorithm How decision tree algorithm works/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="saixia">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Seth's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                How decision tree algorithm works 转载
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-09T22:50:00+08:00">
+                2018-03-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/algorithm/" itemprop="url" rel="index">
+                    <span itemprop="name">algorithm</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+              <span class="post-meta-divider">|</span>
+              <span class="post-meta-item-icon">
+                <i class="fa fa-comment-o"></i>
+              </span>
+              
+                <a href="/2018/03/09/Algorithm How decision tree algorithm works/#SOHUCS" itemprop="discussionUrl">
+                  <span id="changyan_count_unit" class="post-comments-count hc-comment-count" data-xid="2018/03/09/Algorithm How decision tree algorithm works/" itemprop="commentsCount"></span>
+                </a>
+              
+            
+          
+
+          
+          
+             <span id="/2018/03/09/Algorithm How decision tree algorithm works/" class="leancloud_visitors" data-flag-title="How decision tree algorithm works 转载">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Introduction-to-Decision-Tree-Algorithm"><a href="#Introduction-to-Decision-Tree-Algorithm" class="headerlink" title="Introduction to Decision Tree Algorithm"></a>Introduction to Decision Tree Algorithm</h1><img src="/images/How Decision Tree Algorithm works/Decision Tree Algorithm.jpg" class="full-image">
+<p>Decision Tree algorithm belongs to the family of <a href="https://dataaspirant.com/2014/09/19/supervised-and-unsupervised-learning/" target="_blank" rel="external">supervised learning algorithms</a>. Unlike other supervised learning algorithms, decision tree algorithm can be used for solving <a href="https://dataaspirant.com/2014/09/27/classification-and-prediction/" target="_blank" rel="external">regression and classification</a> problems too.</p>
+<p>The general motive of using Decision Tree is to create a training model which can use to predict class or value of target variables by <strong>learning decision rules</strong> inferred from prior data(training data).</p>
+<p>The understanding level of Decision Trees algorithm is so easy compared with other classification algorithms. The decision tree algorithm tries to solve the problem, by using tree representation. Each <strong>internal node</strong> of the tree corresponds to an attribute, and each <strong>leaf node</strong> corresponds to a class label.</p>
+<h2 id="Decision-Tree-Algorithm-Pseudocode"><a href="#Decision-Tree-Algorithm-Pseudocode" class="headerlink" title="Decision Tree Algorithm Pseudocode"></a>Decision Tree Algorithm Pseudocode</h2><ol>
+<li>Place the best attribute of the dataset at the <strong>root</strong> of the tree.</li>
+<li>Split the training set into <strong>subsets</strong>. Subsets should be made in such a way that each subset contains data with the same value for an attribute.</li>
+<li>Repeat step 1 and step 2 on each subset until you find <strong>leaf nodes</strong> in all the branches of the tree.</li>
+</ol>
+<img src="/images/How Decision Tree Algorithm works/Decision Tree classifier.png" class="full-image">
+<p>In decision trees, for predicting a class label for a record we start from the <strong>root</strong> of the tree. We compare the values of the root attribute with record’s attribute. On the basis of comparison, we follow the branch corresponding to that value and jump to the next node.</p>
+<p>We continue comparing our record’s attribute values with other <strong>internal nodes</strong> of the tree until we reach a leaf node with predicted class value. As we know how the modeled decision tree can be used to predict the target class or the value. Now let’s understanding how we can create the decision tree model.</p>
+<h2 id="Assumptions-while-creating-Decision-Tree"><a href="#Assumptions-while-creating-Decision-Tree" class="headerlink" title="Assumptions while creating Decision Tree"></a>Assumptions while creating Decision Tree</h2><p>The below are the some of the assumptions we make while using Decision tree:</p>
+<ul>
+<li>At the beginning, the whole training set is considered as the <strong>root</strong>.</li>
+<li>Feature values are preferred to be categorical. If the values are continuous then they are discretized prior to building the model.</li>
+<li>Records are <strong>distributed recursively</strong> on the basis of attribute values.</li>
+<li>Order to placing attributes as root or internal node of the tree is done by using some statistical approach.</li>
+</ul>
+<img src="/images/How Decision Tree Algorithm works/Decision tree model example Image.jpg" class="full-image">
+<p>Decision Trees follow <strong>Sum of Product (SOP)</strong> representation. For the above images, you can see how <strong>we can predict can we accept the new job offer?  and Use computer daily?</strong> from traversing for the root node to the leaf node.</p>
+<p>It’s a sum of product representation. The Sum of product(SOP) is also known as Disjunctive <strong>Normal Form</strong>. For a class, every branch from the root of the tree to a leaf node having the same class is a conjunction(product) of values, different branches ending in that class form a disjunction(sum).</p>
+<p>The primary challenge in the decision tree implementation is to identify which attributes do we need to consider as the root node and each level. Handling this is know the attributes selection. We have different attributes selection measure to identify the attribute which can be considered as the root note at each level.</p>
+<p><strong>The popular attribute selection measures:</strong></p>
+<ul>
+<li>Information gain</li>
+<li>Gini index</li>
+</ul>
+<h2 id="Attributes-Selection"><a href="#Attributes-Selection" class="headerlink" title="Attributes Selection"></a>Attributes Selection</h2><p>If dataset consists of <strong>“n”</strong> attributes then deciding which attribute to place at the root or at different levels of the tree as internal nodes is a complicated step. By just randomly selecting any node to be the root can’t solve the issue. If we follow a random approach, it may give us bad results with low accuracy.</p>
+<p>For solving this attribute selection problem, researchers worked and devised some solutions. They suggested using some criterion like <strong>information gain, gini index,</strong> etc. These criterions will calculate values for every attribute. The values are sorted, and attributes are placed in the tree by following the order i.e, the attribute with a high value(in case of information gain) is placed at the root.</p>
+<p>While using information Gain as a criterion, we assume attributes to be categorical, and for gini index, attributes are assumed to be continuous.</p>
+<h2 id="Information-Gain"><a href="#Information-Gain" class="headerlink" title="Information Gain"></a>Information Gain</h2><p>By using information gain as a criterion, we try to estimate the information contained by each attribute. We are going to use some points deducted from <a href="https://en.wikipedia.org/wiki/Information_theory" target="_blank" rel="external">information theory</a>.</p>
+<p>To measure the randomness or uncertainty of a random variable X is defined by Entropy.</p>
+<p>For a binary classification problem with only two classes, positive and negative class.</p>
+<ul>
+<li>If all examples are positive or all are negative then entropy will be zero i.e, low.</li>
+<li>If half of the records are of positive class and half are of negative class then entropy is one i.e, high.</li>
+</ul>
+<p>$$H(X)=E<em>{X}[I(x)]=-\sum</em>{x\in X}p(x)logp(x)$$</p>
+<p>By calculating <strong>entropy measure</strong> of each attribute we can calculate their <strong>information gain</strong>. Information Gain calculates the expected reduction in entropy due to sorting on the attribute. Information gain can be calculated.</p>
+<p>To get a clear understanding of calculating <strong>information gain &amp; entropy</strong>, we will try to implement it on a sample data.</p>
+<p><strong>Example: Construct a Decision Tree by using “information gain” as a criterion</strong></p>
+<img src="/images/Example Construct a Decision Tree by using information gain as a criterion.png" class="full-image">
+<p>We are going to use this data sample. Let’s try to use information gain as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
+<p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
+<p>We have chosen some random values to categorize each attribute:</p>
+<img src="/images/table1.jpeg" class="full-image">
+<p>images</p>
+<p>There are <strong>2 steps for calculating information gain for each attribute:</strong></p>
+<p>Calculate entropy of Target.<br>Entropy for every attribute A, B, C, D needs to be calculated. Using information gain formula we will subtract this entropy from the entropy of target. The result is Information Gain.</p>
+<p><strong>The entropy of Target</strong>: We have 8 records with negative class and 8 records with positive class. So, we can directly estimate the entropy of target as 1.</p>
+<img src="/images/table2.jpeg" class="full-image">
+<p>Calculating entropy using formula:</p>
+<p>E(8,8) = -1<em>( (p(+ve)</em>log( p(+ve)) + (p(-ve)<em>log( p(-ve)) )<br>= -1</em>( (8/16)<em>log2(8/16)) + (8/16) </em> log2(8/16) )<br>= 1  </p>
+<h3 id="Information-gain-for-Var-A"><a href="#Information-gain-for-Var-A" class="headerlink" title="Information gain for Var A"></a>Information gain for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value  </p>
+<ul>
+<li>For Var A &gt;= 5 &amp; class == positive: 5/12  </li>
+<li>For Var A &gt;= 5 &amp; class == negative: 7/12  <ul>
+<li>Entropy(5,7) = -1 <em> ( (5/12)</em>log2(5/12) + (7/12)*log2(7/12)) = 0.9799  </li>
+</ul>
+</li>
+<li>For Var A &lt;5 &amp; class == positive: 3/4  </li>
+<li>For Var A &lt;5 &amp; class == negative: 1/4  <ul>
+<li>Entropy(3,1) =  -1 <em> ( (3/4)</em>log2(3/4) + (1/4)*log2(1/4)) = 0.81128  </li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, A) = P(&gt;=5) <em> E(5,7) + P(&lt;5) </em> E(3,1)<br>= (12/16) <em> 0.9799 + (4/16) </em> 0.81128 = 0.937745  </p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,A) = 1- 0.9337745 = 0.062255</strong>   </p>
+<h3 id="Information-gain-for-Var-B"><a href="#Information-gain-for-Var-B" class="headerlink" title="Information gain for Var B"></a>Information gain for Var B</h3><p>Var B has value &gt;=3 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var B &gt;= 3 &amp; class == positive: 8/12  </li>
+<li>For Var B &gt;= 3 &amp; class == negative: 4/12  <ul>
+<li>Entropy(8,4) = -1 <em> ( (8/12)</em>log2(8/12) + (4/12)*log2(4/12)) = 0.39054  </li>
+</ul>
+</li>
+<li>For VarB &lt;3 &amp; class == positive: 0/4  </li>
+<li>For Var B &lt;3 &amp; class == negative: 4/4  <ul>
+<li>Entropy(0,4) =  -1 <em> ( (0/4)</em>log2(0/4) + (4/4)*log2(4/4)) = 0  </li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, B) = P(&gt;=3) <em> E(8,4) + P(&lt;3) </em> E(0,4)<br>= (12/16) <em> 0.39054 + (4/16) </em> 0 = 0.292905  </p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,B) = 1- 0.292905= 0.707095</strong></p>
+<h3 id="Information-gain-for-Var-C"><a href="#Information-gain-for-Var-C" class="headerlink" title="Information gain for Var C"></a>Information gain for Var C</h3><p>Var C has value &gt;=4.2 for 6 records out of 16 and 10 records with value &lt;4.2 value.</p>
+<ul>
+<li>For Var C &gt;= 4.2 &amp; class == positive: 0/6</li>
+<li>For Var C &gt;= 4.2 &amp; class == negative:  6/6<ul>
+<li>Entropy(0,6) = 0</li>
+</ul>
+</li>
+<li>For VarC &lt; 4.2 &amp; class == positive: 8/10</li>
+<li>For Var C &lt; 4.2 &amp; class == negative: 2/10<ul>
+<li>Entropy(8,2) = 0.72193</li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, C) = P(&gt;=4.2) <em> E(0,6) + P(&lt; 4.2) </em> E(8,2)<br>= (6/16) <em> 0 + (10/16) </em> 0.72193 = 0.4512</p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,C) = 1- 0.4512= 0.5488</strong></p>
+<h3 id="Information-gain-for-Var-D"><a href="#Information-gain-for-Var-D" class="headerlink" title="Information gain for Var D"></a>Information gain for Var D</h3><p>Var D has value &gt;=1.4 for 5 records out of 16 and 11 records with value &lt;5 value.</p>
+<ul>
+<li>For Var D &gt;= 1.4 &amp; class == positive: 0/5</li>
+<li>For Var D &gt;= 1.4 &amp; class == negative: 5/5<ul>
+<li>Entropy(0,5) = 0</li>
+</ul>
+</li>
+<li>For Var D &lt; 1.4 &amp; class == positive: 8/11</li>
+<li>For Var D &lt; 14 &amp; class == negative: 3/11<ul>
+<li>Entropy(8,3) =  -1 <em> ( (8/11)</em>log2(8/11) + (3/11)*log2(3/11)) = 0.84532</li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, D) = P(&gt;=1.4) <em> E(0,5) + P(&lt; 1.4) </em> E(8,3)<br>= 5/16 <em> 0 + (11/16) </em> 0.84532 = 0.5811575</p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,D) = 1- 0.5811575 = 0.41189</strong></p>
+<img src="/images/table3.jpeg" class="full-image">
+<p>From the above Information Gain calculations, we can build a decision tree. We should place the attributes on the tree according to their values.</p>
+<p>An Attribute with better value than other should position as root and A branch with entropy 0 should be converted to a leaf node. A branch with entropy more than 0 needs further splitting.</p>
+<img src="/images/info_gain_final.jpg" class="full-image">
+<h2 id="Gini-Index"><a href="#Gini-Index" class="headerlink" title="Gini Index"></a>Gini Index</h2><p>Gini Index is a metric to measure how often a randomly chosen element would be incorrectly identified. It means an attribute with lower gini index should be preferred.</p>
+<p><strong>Example: Construct a Decision Tree by using “gini index” as a criterion</strong></p>
+<img src="/images/Example Construct a Decision Tree by using gini index as a criterion.png" class="full-image">
+<p>We are going to use same data sample that we used for information gain example. Let’s try to use gini index as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
+<p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
+<p>We have chosen some random values to categorize each attribute:</p>
+<img src="/images/table4.jpeg" class="full-image">
+<h3 id="Gini-Index-for-Var-A"><a href="#Gini-Index-for-Var-A" class="headerlink" title="Gini Index for Var A"></a>Gini Index for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var A &gt;= 5 &amp; class == positive: 5/12</li>
+<li>For Var A &gt;= 5 &amp; class == negative: 7/12<ul>
+<li>gini(5,7) = 1- ( (5/12)2 + (7/12)2 ) = 0.4860</li>
+</ul>
+</li>
+<li>For Var A &lt;5 &amp; class == positive: 3/4</li>
+<li>For Var A &lt;5 &amp; class == negative: 1/4<ul>
+<li>gini(3,1) = 1- ( (3/4)2 + (1/4)2 ) = 0.375</li>
+</ul>
+</li>
+</ul>
+<p>By adding weight and sum each of the gini indices:</p>
+<p><strong>gini(Target, A) = (12/16) <em> (0.486) + (4/16) </em> (0.375) = 0.45825</strong></p>
+<h3 id="Gini-Index-for-Var-B"><a href="#Gini-Index-for-Var-B" class="headerlink" title="Gini Index for Var B"></a>Gini Index for Var B</h3><p>Var B has value &gt;=3 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var B &gt;= 3 &amp; class == positive: 8/12</li>
+<li>For Var B &gt;= 3 &amp; class == negative: 4/12<ul>
+<li>gini(8,4) = 1- ( (8/12)2 + (4/12)2 ) = 0.446</li>
+</ul>
+</li>
+<li>For Var B &lt;3 &amp; class == positive: 0/4</li>
+<li>For Var B &lt;3 &amp; class == negative: 4/4<ul>
+<li>gin(0,4) = 1- ( (0/4)2 + (4/4)2 ) = 0</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, B) = (12/16) <em> 0.446 + (4/16) </em> 0 = 0.3345</strong></p>
+<h3 id="Gini-Index-for-Var-C"><a href="#Gini-Index-for-Var-C" class="headerlink" title="Gini Index for Var C"></a>Gini Index for Var C</h3><p>Var C has value &gt;=4.2 for 6 records out of 16 and 10 records with value &lt;4.2 value.</p>
+<ul>
+<li>For Var C &gt;= 4.2 &amp; class == positive: 0/6</li>
+<li>For Var C &gt;= 4.2 &amp; class == negative: 6/6<ul>
+<li>gini(0,6) = 1- ( (0/8)2 + (6/6)2 ) = 0</li>
+</ul>
+</li>
+<li>For Var C &lt; 4.2&amp; class == positive: 8/10</li>
+<li>For Var C &lt; 4.2 &amp; class == negative: 2/10<ul>
+<li>gin(8,2) = 1- ( (8/10)2 + (2/10)2 ) = 0.32</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, C) = (6/16) <em> 0+ (10/16) </em> 0.32 = 0.2</strong></p>
+<h3 id="Gini-Index-for-Var-D"><a href="#Gini-Index-for-Var-D" class="headerlink" title="Gini Index for Var D"></a>Gini Index for Var D</h3><p>Var D has value &gt;=1.4 for 5 records out of 16 and 11 records with value &lt;1.4 value.</p>
+<ul>
+<li>For Var D &gt;= 1.4 &amp; class == positive: 0/5</li>
+<li>For Var D &gt;= 1.4 &amp; class == negative: 5/5<ul>
+<li>gini(0,5) = 1- ( (0/5)2 + (5/5)2 ) = 0</li>
+</ul>
+</li>
+<li>For Var D &lt; 1.4 &amp; class == positive: 8/11</li>
+<li>For Var D &lt; 1.4 &amp; class == negative: 3/11<ul>
+<li>gin(8,3) = 1- ( (8/11)2 + (3/11)2 ) = 0.397</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, D) = (5/16) <em> 0+ (11/16) </em> 0.397 = 0.273</strong></p>
+<img src="/images/table5.jpeg" class="full-image">
+<img src="/images/gini_final.jpg" class="full-image">
+<h2 id="Overfitting"><a href="#Overfitting" class="headerlink" title="Overfitting"></a>Overfitting</h2><p>Overfitting is a practical problem while building a decision tree model. The model is having an issue of overfitting is considered when the algorithm continues to go deeper and deeper in the to reduce the training set error but results with an increased test set error i.e, Accuracy of prediction for our model goes down. It generally happens when it builds many branches due to outliers and irregularities in data.</p>
+<p>Two approaches which we can use to avoid overfitting are:</p>
+<ul>
+<li>Pre-Pruning</li>
+<li>Post-Pruning</li>
+</ul>
+<h3 id="Pre-Pruning"><a href="#Pre-Pruning" class="headerlink" title="Pre-Pruning"></a>Pre-Pruning</h3><p>In pre-pruning, it stops the tree construction bit early. It is preferred not to split a node if its goodness measure is below a threshold value. But it’s difficult to choose an appropriate stopping point.</p>
+<h3 id="Post-Pruning"><a href="#Post-Pruning" class="headerlink" title="Post-Pruning"></a>Post-Pruning</h3><p>In post-pruning first, it goes deeper and deeper in the tree to build a complete tree. If the tree shows the overfitting problem then pruning is done as a post-pruning step. We use a cross-validation data to check the effect of our pruning. Using cross-validation data, it tests whether expanding a node will make an improvement or not.</p>
+<p>If it shows an improvement, then we can continue by expanding that node. But if it shows a reduction in accuracy then it should not be expanded i.e, the node should be converted to a leaf node.</p>
+<h2 id="Decision-Tree-Algorithm-Advantages-and-Disadvantages"><a href="#Decision-Tree-Algorithm-Advantages-and-Disadvantages" class="headerlink" title="Decision Tree Algorithm Advantages and Disadvantages"></a>Decision Tree Algorithm Advantages and Disadvantages</h2><h3 id="Advantages"><a href="#Advantages" class="headerlink" title="Advantages:"></a>Advantages:</h3><ol>
+<li>Decision Trees are easy to explain. It results in a set of rules.</li>
+<li>It follows the same approach as humans generally follow while making decisions.</li>
+<li>Interpretation of a complex Decision Tree model can be simplified by its visualizations. Even a naive person can understand logic.</li>
+<li>The Number of hyper-parameters to be tuned is almost null.<h3 id="Disadvantages"><a href="#Disadvantages" class="headerlink" title="Disadvantages:"></a>Disadvantages:</h3></li>
+<li>There is a high probability of overfitting in Decision Tree.</li>
+<li>Generally, it gives low prediction accuracy for a dataset as compared to other machine learning algorithms.</li>
+<li>Information gain in a decision tree with categorical variables gives a biased response for attributes with greater no. of categories.</li>
+<li>Calculations can become complex when there are many class labels.</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div id="cyReward" role="cylabs" data-use="reward"></div>
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！欢迎大家加我微信交流：saixialv</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechatpay.jpeg" alt="saixia WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpeg" alt="saixia Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Algorithm/" rel="tag"># Algorithm</a>
+          
+            <a href="/tags/Decision-tree/" rel="tag"># Decision tree</a>
+          
+            <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+            <a href="/tags/决策树/" rel="tag"># 决策树</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/14/叶武滨说时间管理|世界时间管理大师的异曲同工【07】/" rel="next" title="叶武滨说时间管理|世界时间管理大师的异曲同工【07】转载">
+                <i class="fa fa-chevron-left"></i> 叶武滨说时间管理|世界时间管理大师的异曲同工【07】转载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="SOHUCS"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="saixia" />
+          <p class="site-author-name" itemprop="name">saixia</p>
+           
+              <p class="site-description motion-element" itemprop="description">Whatever is worth doing is worth doing well I'll think of you every step of the way</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">37</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/saixia" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction-to-Decision-Tree-Algorithm"><span class="nav-number">1.</span> <span class="nav-text">Introduction to Decision Tree Algorithm</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Decision-Tree-Algorithm-Pseudocode"><span class="nav-number">1.1.</span> <span class="nav-text">Decision Tree Algorithm Pseudocode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Assumptions-while-creating-Decision-Tree"><span class="nav-number">1.2.</span> <span class="nav-text">Assumptions while creating Decision Tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attributes-Selection"><span class="nav-number">1.3.</span> <span class="nav-text">Attributes Selection</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Information-Gain"><span class="nav-number">1.4.</span> <span class="nav-text">Information Gain</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Information-gain-for-Var-A"><span class="nav-number">1.4.1.</span> <span class="nav-text">Information gain for Var A</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Information-gain-for-Var-B"><span class="nav-number">1.4.2.</span> <span class="nav-text">Information gain for Var B</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Information-gain-for-Var-C"><span class="nav-number">1.4.3.</span> <span class="nav-text">Information gain for Var C</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Information-gain-for-Var-D"><span class="nav-number">1.4.4.</span> <span class="nav-text">Information gain for Var D</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gini-Index"><span class="nav-number">1.5.</span> <span class="nav-text">Gini Index</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gini-Index-for-Var-A"><span class="nav-number">1.5.1.</span> <span class="nav-text">Gini Index for Var A</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gini-Index-for-Var-B"><span class="nav-number">1.5.2.</span> <span class="nav-text">Gini Index for Var B</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gini-Index-for-Var-C"><span class="nav-number">1.5.3.</span> <span class="nav-text">Gini Index for Var C</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gini-Index-for-Var-D"><span class="nav-number">1.5.4.</span> <span class="nav-text">Gini Index for Var D</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Overfitting"><span class="nav-number">1.6.</span> <span class="nav-text">Overfitting</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pre-Pruning"><span class="nav-number">1.6.1.</span> <span class="nav-text">Pre-Pruning</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Post-Pruning"><span class="nav-number">1.6.2.</span> <span class="nav-text">Post-Pruning</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Decision-Tree-Algorithm-Advantages-and-Disadvantages"><span class="nav-number">1.7.</span> <span class="nav-text">Decision Tree Algorithm Advantages and Disadvantages</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Advantages"><span class="nav-number">1.7.1.</span> <span class="nav-text">Advantages:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Disadvantages"><span class="nav-number">1.7.2.</span> <span class="nav-text">Disadvantages:</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">saixia</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+  
+    <script type="text/javascript">
+    (function(){
+      var appid = 'cyt4Mszyk';
+      var conf = 'prod_84012c6583611e5d040e9308852b5267';
+      var width = window.innerWidth || document.documentElement.clientWidth;
+      if (width < 960) {
+      window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="https://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("https://changyan.sohu.com/upload/changyan.js",function(){
+        window.changyan.api.config({appid:appid,conf:conf})});
+      }
+    })();
+    </script>
+    <script type="text/javascript" src="https://assets.changyan.sohu.com/upload/plugins/plugins.count.js"></script>
+  
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("LjhheWaehewK7q4K5t2VQv6W-gzGzoHsz", "xywKJ7E9yXzxFus7WnVTYStW");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+</body>
+</html>

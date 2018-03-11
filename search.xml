@@ -3,7 +3,300 @@
   
     
     <entry>
-      <title><![CDATA[管理时间的核心是事件的分类|叶武滨说时间管理【05】转载]]></title>
+      <title><![CDATA[How decision tree algorithm works 转载]]></title>
+      <url>/2018/03/09/Algorithm%20How%20decision%20tree%20algorithm%20works/</url>
+      <content type="html"><![CDATA[<h1 id="Introduction-to-Decision-Tree-Algorithm"><a href="#Introduction-to-Decision-Tree-Algorithm" class="headerlink" title="Introduction to Decision Tree Algorithm"></a>Introduction to Decision Tree Algorithm</h1><img src="/images/How Decision Tree Algorithm works/Decision Tree Algorithm.jpg" class="full-image">
+<p>Decision Tree algorithm belongs to the family of <a href="https://dataaspirant.com/2014/09/19/supervised-and-unsupervised-learning/" target="_blank" rel="external">supervised learning algorithms</a>. Unlike other supervised learning algorithms, decision tree algorithm can be used for solving <a href="https://dataaspirant.com/2014/09/27/classification-and-prediction/" target="_blank" rel="external">regression and classification</a> problems too.</p>
+<p>The general motive of using Decision Tree is to create a training model which can use to predict class or value of target variables by <strong>learning decision rules</strong> inferred from prior data(training data).</p>
+<p>The understanding level of Decision Trees algorithm is so easy compared with other classification algorithms. The decision tree algorithm tries to solve the problem, by using tree representation. Each <strong>internal node</strong> of the tree corresponds to an attribute, and each <strong>leaf node</strong> corresponds to a class label.</p>
+<h2 id="Decision-Tree-Algorithm-Pseudocode"><a href="#Decision-Tree-Algorithm-Pseudocode" class="headerlink" title="Decision Tree Algorithm Pseudocode"></a>Decision Tree Algorithm Pseudocode</h2><ol>
+<li>Place the best attribute of the dataset at the <strong>root</strong> of the tree.</li>
+<li>Split the training set into <strong>subsets</strong>. Subsets should be made in such a way that each subset contains data with the same value for an attribute.</li>
+<li>Repeat step 1 and step 2 on each subset until you find <strong>leaf nodes</strong> in all the branches of the tree.</li>
+</ol>
+<img src="/images/How Decision Tree Algorithm works/Decision Tree classifier.png" class="full-image">
+<p>In decision trees, for predicting a class label for a record we start from the <strong>root</strong> of the tree. We compare the values of the root attribute with record’s attribute. On the basis of comparison, we follow the branch corresponding to that value and jump to the next node.</p>
+<p>We continue comparing our record’s attribute values with other <strong>internal nodes</strong> of the tree until we reach a leaf node with predicted class value. As we know how the modeled decision tree can be used to predict the target class or the value. Now let’s understanding how we can create the decision tree model.</p>
+<h2 id="Assumptions-while-creating-Decision-Tree"><a href="#Assumptions-while-creating-Decision-Tree" class="headerlink" title="Assumptions while creating Decision Tree"></a>Assumptions while creating Decision Tree</h2><p>The below are the some of the assumptions we make while using Decision tree:</p>
+<ul>
+<li>At the beginning, the whole training set is considered as the <strong>root</strong>.</li>
+<li>Feature values are preferred to be categorical. If the values are continuous then they are discretized prior to building the model.</li>
+<li>Records are <strong>distributed recursively</strong> on the basis of attribute values.</li>
+<li>Order to placing attributes as root or internal node of the tree is done by using some statistical approach.</li>
+</ul>
+<img src="/images/How Decision Tree Algorithm works/Decision tree model example Image.jpg" class="full-image">
+<p>Decision Trees follow <strong>Sum of Product (SOP)</strong> representation. For the above images, you can see how <strong>we can predict can we accept the new job offer?  and Use computer daily?</strong> from traversing for the root node to the leaf node.</p>
+<p>It’s a sum of product representation. The Sum of product(SOP) is also known as Disjunctive <strong>Normal Form</strong>. For a class, every branch from the root of the tree to a leaf node having the same class is a conjunction(product) of values, different branches ending in that class form a disjunction(sum).</p>
+<p>The primary challenge in the decision tree implementation is to identify which attributes do we need to consider as the root node and each level. Handling this is know the attributes selection. We have different attributes selection measure to identify the attribute which can be considered as the root note at each level.</p>
+<p><strong>The popular attribute selection measures:</strong></p>
+<ul>
+<li>Information gain</li>
+<li>Gini index</li>
+</ul>
+<h2 id="Attributes-Selection"><a href="#Attributes-Selection" class="headerlink" title="Attributes Selection"></a>Attributes Selection</h2><p>If dataset consists of <strong>“n”</strong> attributes then deciding which attribute to place at the root or at different levels of the tree as internal nodes is a complicated step. By just randomly selecting any node to be the root can’t solve the issue. If we follow a random approach, it may give us bad results with low accuracy.</p>
+<p>For solving this attribute selection problem, researchers worked and devised some solutions. They suggested using some criterion like <strong>information gain, gini index,</strong> etc. These criterions will calculate values for every attribute. The values are sorted, and attributes are placed in the tree by following the order i.e, the attribute with a high value(in case of information gain) is placed at the root.</p>
+<p>While using information Gain as a criterion, we assume attributes to be categorical, and for gini index, attributes are assumed to be continuous.</p>
+<h2 id="Information-Gain"><a href="#Information-Gain" class="headerlink" title="Information Gain"></a>Information Gain</h2><p>By using information gain as a criterion, we try to estimate the information contained by each attribute. We are going to use some points deducted from <a href="https://en.wikipedia.org/wiki/Information_theory" target="_blank" rel="external">information theory</a>.</p>
+<p>To measure the randomness or uncertainty of a random variable X is defined by Entropy.</p>
+<p>For a binary classification problem with only two classes, positive and negative class.</p>
+<ul>
+<li>If all examples are positive or all are negative then entropy will be zero i.e, low.</li>
+<li>If half of the records are of positive class and half are of negative class then entropy is one i.e, high.</li>
+</ul>
+<p>$$H(X)=E<em>{X}[I(x)]=-\sum</em>{x\in X}p(x)logp(x)$$</p>
+<p>By calculating <strong>entropy measure</strong> of each attribute we can calculate their <strong>information gain</strong>. Information Gain calculates the expected reduction in entropy due to sorting on the attribute. Information gain can be calculated.</p>
+<p>To get a clear understanding of calculating <strong>information gain &amp; entropy</strong>, we will try to implement it on a sample data.</p>
+<p><strong>Example: Construct a Decision Tree by using “information gain” as a criterion</strong></p>
+<img src="/images/Example Construct a Decision Tree by using information gain as a criterion.png" class="full-image">
+<p>We are going to use this data sample. Let’s try to use information gain as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
+<p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
+<p>We have chosen some random values to categorize each attribute:</p>
+<img src="/images/table1.jpeg" class="full-image">
+<p>images</p>
+<p>There are <strong>2 steps for calculating information gain for each attribute:</strong></p>
+<p>Calculate entropy of Target.<br>Entropy for every attribute A, B, C, D needs to be calculated. Using information gain formula we will subtract this entropy from the entropy of target. The result is Information Gain.</p>
+<p><strong>The entropy of Target</strong>: We have 8 records with negative class and 8 records with positive class. So, we can directly estimate the entropy of target as 1.</p>
+<img src="/images/table2.jpeg" class="full-image">
+<p>Calculating entropy using formula:</p>
+<p>E(8,8) = -1<em>( (p(+ve)</em>log( p(+ve)) + (p(-ve)<em>log( p(-ve)) )<br>= -1</em>( (8/16)<em>log2(8/16)) + (8/16) </em> log2(8/16) )<br>= 1  </p>
+<h3 id="Information-gain-for-Var-A"><a href="#Information-gain-for-Var-A" class="headerlink" title="Information gain for Var A"></a>Information gain for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value  </p>
+<ul>
+<li>For Var A &gt;= 5 &amp; class == positive: 5/12  </li>
+<li>For Var A &gt;= 5 &amp; class == negative: 7/12  <ul>
+<li>Entropy(5,7) = -1 <em> ( (5/12)</em>log2(5/12) + (7/12)*log2(7/12)) = 0.9799  </li>
+</ul>
+</li>
+<li>For Var A &lt;5 &amp; class == positive: 3/4  </li>
+<li>For Var A &lt;5 &amp; class == negative: 1/4  <ul>
+<li>Entropy(3,1) =  -1 <em> ( (3/4)</em>log2(3/4) + (1/4)*log2(1/4)) = 0.81128  </li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, A) = P(&gt;=5) <em> E(5,7) + P(&lt;5) </em> E(3,1)<br>= (12/16) <em> 0.9799 + (4/16) </em> 0.81128 = 0.937745  </p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,A) = 1- 0.9337745 = 0.062255</strong>   </p>
+<h3 id="Information-gain-for-Var-B"><a href="#Information-gain-for-Var-B" class="headerlink" title="Information gain for Var B"></a>Information gain for Var B</h3><p>Var B has value &gt;=3 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var B &gt;= 3 &amp; class == positive: 8/12  </li>
+<li>For Var B &gt;= 3 &amp; class == negative: 4/12  <ul>
+<li>Entropy(8,4) = -1 <em> ( (8/12)</em>log2(8/12) + (4/12)*log2(4/12)) = 0.39054  </li>
+</ul>
+</li>
+<li>For VarB &lt;3 &amp; class == positive: 0/4  </li>
+<li>For Var B &lt;3 &amp; class == negative: 4/4  <ul>
+<li>Entropy(0,4) =  -1 <em> ( (0/4)</em>log2(0/4) + (4/4)*log2(4/4)) = 0  </li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, B) = P(&gt;=3) <em> E(8,4) + P(&lt;3) </em> E(0,4)<br>= (12/16) <em> 0.39054 + (4/16) </em> 0 = 0.292905  </p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,B) = 1- 0.292905= 0.707095</strong></p>
+<h3 id="Information-gain-for-Var-C"><a href="#Information-gain-for-Var-C" class="headerlink" title="Information gain for Var C"></a>Information gain for Var C</h3><p>Var C has value &gt;=4.2 for 6 records out of 16 and 10 records with value &lt;4.2 value.</p>
+<ul>
+<li>For Var C &gt;= 4.2 &amp; class == positive: 0/6</li>
+<li>For Var C &gt;= 4.2 &amp; class == negative:  6/6<ul>
+<li>Entropy(0,6) = 0</li>
+</ul>
+</li>
+<li>For VarC &lt; 4.2 &amp; class == positive: 8/10</li>
+<li>For Var C &lt; 4.2 &amp; class == negative: 2/10<ul>
+<li>Entropy(8,2) = 0.72193</li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, C) = P(&gt;=4.2) <em> E(0,6) + P(&lt; 4.2) </em> E(8,2)<br>= (6/16) <em> 0 + (10/16) </em> 0.72193 = 0.4512</p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,C) = 1- 0.4512= 0.5488</strong></p>
+<h3 id="Information-gain-for-Var-D"><a href="#Information-gain-for-Var-D" class="headerlink" title="Information gain for Var D"></a>Information gain for Var D</h3><p>Var D has value &gt;=1.4 for 5 records out of 16 and 11 records with value &lt;5 value.</p>
+<ul>
+<li>For Var D &gt;= 1.4 &amp; class == positive: 0/5</li>
+<li>For Var D &gt;= 1.4 &amp; class == negative: 5/5<ul>
+<li>Entropy(0,5) = 0</li>
+</ul>
+</li>
+<li>For Var D &lt; 1.4 &amp; class == positive: 8/11</li>
+<li>For Var D &lt; 14 &amp; class == negative: 3/11<ul>
+<li>Entropy(8,3) =  -1 <em> ( (8/11)</em>log2(8/11) + (3/11)*log2(3/11)) = 0.84532</li>
+</ul>
+</li>
+</ul>
+<p>Entropy(Target, D) = P(&gt;=1.4) <em> E(0,5) + P(&lt; 1.4) </em> E(8,3)<br>= 5/16 <em> 0 + (11/16) </em> 0.84532 = 0.5811575</p>
+<p><strong>Information Gain(IG) = E(Target) - E(Target,D) = 1- 0.5811575 = 0.41189</strong></p>
+<img src="/images/table3.jpeg" class="full-image">
+<p>From the above Information Gain calculations, we can build a decision tree. We should place the attributes on the tree according to their values.</p>
+<p>An Attribute with better value than other should position as root and A branch with entropy 0 should be converted to a leaf node. A branch with entropy more than 0 needs further splitting.</p>
+<img src="/images/info_gain_final.jpg" class="full-image">
+<h2 id="Gini-Index"><a href="#Gini-Index" class="headerlink" title="Gini Index"></a>Gini Index</h2><p>Gini Index is a metric to measure how often a randomly chosen element would be incorrectly identified. It means an attribute with lower gini index should be preferred.</p>
+<p><strong>Example: Construct a Decision Tree by using “gini index” as a criterion</strong></p>
+<img src="/images/Example Construct a Decision Tree by using gini index as a criterion.png" class="full-image">
+<p>We are going to use same data sample that we used for information gain example. Let’s try to use gini index as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
+<p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
+<p>We have chosen some random values to categorize each attribute:</p>
+<img src="/images/table4.jpeg" class="full-image">
+<h3 id="Gini-Index-for-Var-A"><a href="#Gini-Index-for-Var-A" class="headerlink" title="Gini Index for Var A"></a>Gini Index for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var A &gt;= 5 &amp; class == positive: 5/12</li>
+<li>For Var A &gt;= 5 &amp; class == negative: 7/12<ul>
+<li>gini(5,7) = 1- ( (5/12)2 + (7/12)2 ) = 0.4860</li>
+</ul>
+</li>
+<li>For Var A &lt;5 &amp; class == positive: 3/4</li>
+<li>For Var A &lt;5 &amp; class == negative: 1/4<ul>
+<li>gini(3,1) = 1- ( (3/4)2 + (1/4)2 ) = 0.375</li>
+</ul>
+</li>
+</ul>
+<p>By adding weight and sum each of the gini indices:</p>
+<p><strong>gini(Target, A) = (12/16) <em> (0.486) + (4/16) </em> (0.375) = 0.45825</strong></p>
+<h3 id="Gini-Index-for-Var-B"><a href="#Gini-Index-for-Var-B" class="headerlink" title="Gini Index for Var B"></a>Gini Index for Var B</h3><p>Var B has value &gt;=3 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
+<ul>
+<li>For Var B &gt;= 3 &amp; class == positive: 8/12</li>
+<li>For Var B &gt;= 3 &amp; class == negative: 4/12<ul>
+<li>gini(8,4) = 1- ( (8/12)2 + (4/12)2 ) = 0.446</li>
+</ul>
+</li>
+<li>For Var B &lt;3 &amp; class == positive: 0/4</li>
+<li>For Var B &lt;3 &amp; class == negative: 4/4<ul>
+<li>gin(0,4) = 1- ( (0/4)2 + (4/4)2 ) = 0</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, B) = (12/16) <em> 0.446 + (4/16) </em> 0 = 0.3345</strong></p>
+<h3 id="Gini-Index-for-Var-C"><a href="#Gini-Index-for-Var-C" class="headerlink" title="Gini Index for Var C"></a>Gini Index for Var C</h3><p>Var C has value &gt;=4.2 for 6 records out of 16 and 10 records with value &lt;4.2 value.</p>
+<ul>
+<li>For Var C &gt;= 4.2 &amp; class == positive: 0/6</li>
+<li>For Var C &gt;= 4.2 &amp; class == negative: 6/6<ul>
+<li>gini(0,6) = 1- ( (0/8)2 + (6/6)2 ) = 0</li>
+</ul>
+</li>
+<li>For Var C &lt; 4.2&amp; class == positive: 8/10</li>
+<li>For Var C &lt; 4.2 &amp; class == negative: 2/10<ul>
+<li>gin(8,2) = 1- ( (8/10)2 + (2/10)2 ) = 0.32</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, C) = (6/16) <em> 0+ (10/16) </em> 0.32 = 0.2</strong></p>
+<h3 id="Gini-Index-for-Var-D"><a href="#Gini-Index-for-Var-D" class="headerlink" title="Gini Index for Var D"></a>Gini Index for Var D</h3><p>Var D has value &gt;=1.4 for 5 records out of 16 and 11 records with value &lt;1.4 value.</p>
+<ul>
+<li>For Var D &gt;= 1.4 &amp; class == positive: 0/5</li>
+<li>For Var D &gt;= 1.4 &amp; class == negative: 5/5<ul>
+<li>gini(0,5) = 1- ( (0/5)2 + (5/5)2 ) = 0</li>
+</ul>
+</li>
+<li>For Var D &lt; 1.4 &amp; class == positive: 8/11</li>
+<li>For Var D &lt; 1.4 &amp; class == negative: 3/11<ul>
+<li>gin(8,3) = 1- ( (8/11)2 + (3/11)2 ) = 0.397</li>
+</ul>
+</li>
+</ul>
+<p><strong>gini(Target, D) = (5/16) <em> 0+ (11/16) </em> 0.397 = 0.273</strong></p>
+<img src="/images/table5.jpeg" class="full-image">
+<img src="/images/gini_final.jpg" class="full-image">
+<h2 id="Overfitting"><a href="#Overfitting" class="headerlink" title="Overfitting"></a>Overfitting</h2><p>Overfitting is a practical problem while building a decision tree model. The model is having an issue of overfitting is considered when the algorithm continues to go deeper and deeper in the to reduce the training set error but results with an increased test set error i.e, Accuracy of prediction for our model goes down. It generally happens when it builds many branches due to outliers and irregularities in data.</p>
+<p>Two approaches which we can use to avoid overfitting are:</p>
+<ul>
+<li>Pre-Pruning</li>
+<li>Post-Pruning</li>
+</ul>
+<h3 id="Pre-Pruning"><a href="#Pre-Pruning" class="headerlink" title="Pre-Pruning"></a>Pre-Pruning</h3><p>In pre-pruning, it stops the tree construction bit early. It is preferred not to split a node if its goodness measure is below a threshold value. But it’s difficult to choose an appropriate stopping point.</p>
+<h3 id="Post-Pruning"><a href="#Post-Pruning" class="headerlink" title="Post-Pruning"></a>Post-Pruning</h3><p>In post-pruning first, it goes deeper and deeper in the tree to build a complete tree. If the tree shows the overfitting problem then pruning is done as a post-pruning step. We use a cross-validation data to check the effect of our pruning. Using cross-validation data, it tests whether expanding a node will make an improvement or not.</p>
+<p>If it shows an improvement, then we can continue by expanding that node. But if it shows a reduction in accuracy then it should not be expanded i.e, the node should be converted to a leaf node.</p>
+<h2 id="Decision-Tree-Algorithm-Advantages-and-Disadvantages"><a href="#Decision-Tree-Algorithm-Advantages-and-Disadvantages" class="headerlink" title="Decision Tree Algorithm Advantages and Disadvantages"></a>Decision Tree Algorithm Advantages and Disadvantages</h2><h3 id="Advantages"><a href="#Advantages" class="headerlink" title="Advantages:"></a>Advantages:</h3><ol>
+<li>Decision Trees are easy to explain. It results in a set of rules.</li>
+<li>It follows the same approach as humans generally follow while making decisions.</li>
+<li>Interpretation of a complex Decision Tree model can be simplified by its visualizations. Even a naive person can understand logic.</li>
+<li>The Number of hyper-parameters to be tuned is almost null.<h3 id="Disadvantages"><a href="#Disadvantages" class="headerlink" title="Disadvantages:"></a>Disadvantages:</h3></li>
+<li>There is a high probability of overfitting in Decision Tree.</li>
+<li>Generally, it gives low prediction accuracy for a dataset as compared to other machine learning algorithms.</li>
+<li>Information gain in a decision tree with categorical variables gives a biased response for attributes with greater no. of categories.</li>
+<li>Calculations can become complex when there are many class labels.</li>
+</ol>
+]]></content>
+      
+        <categories>
+            
+            <category> algorithm </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Algorithm </tag>
+            
+            <tag> Decision tree </tag>
+            
+            <tag> 算法 </tag>
+            
+            <tag> 决策树 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[叶武滨说时间管理|世界时间管理大师的异曲同工【07】转载]]></title>
+      <url>/2018/01/14/%E5%8F%B6%E6%AD%A6%E6%BB%A8%E8%AF%B4%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%7C%E4%B8%96%E7%95%8C%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%E5%A4%A7%E5%B8%88%E7%9A%84%E5%BC%82%E6%9B%B2%E5%90%8C%E5%B7%A5%E3%80%9007%E3%80%91/</url>
+      <content type="html"><![CDATA[<h1 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h1><p>大家好，我是易效能的叶武滨老师。在前几天的课程中我和大家分享了GTD的思想，今天我将这个思想和之前所讲的几个时间管理的理念一并做一个对着，所有的理念都是想通的，这叫大道至简，最终的道理都指向一个。记得我们谈过德鲁克先生谈到的要做要事。我们也讲过高效能人事的七个习惯的作者史蒂芬柯维提倡的做第二象限重要不紧急的事情。我们也谈到过吃青蛙的理论，马克吐温讲每天早上起来我们要活吃一只大青蛙。那我今天就把这个青蛙的理论来讲一讲。博恩崔西把吃青蛙的理论发展成为吃三只青蛙。也就是说重要的事情要做三件，人生不在于做多少事情，而在于要把重要的事情首先做、用心做、做到极致。大卫艾伦让我们把所有的事物、接收到的信息都要装在一个收件箱里面，要就是说要把他写下来或者装在移动手机的app当中。</p>
+<p>只有把一切事物收集起来，我们才能对其进行分类。删除到不做的，搁置将来做的事情，把剩下要做的分成日历和清单。清单如果多，我们可以将其分为有截止日的和没有截止日的，按照情景来分的清单。但总的来说我们把他分为两种一个叫做日历一个叫做清单。日历上面是特定时间要完成的，没有重要不重要的概念。当然来你可能约定了某个时间各人打电话，这个没有重要不重要，在某个时间你必须要做。必须要去做的事情，你就要写在日历上。我们这里的必须是特定时间。我们也可以这么来理解，叫固定时间的事情，除此之外的事情。我们可以根据情景来适应变化，这样的计划才能够赶上变化。当然拉，日常表上你还是选择相对比较的事情，但是他少不会影响大局。更重要的是我们如何管理清单上的事物，应为清单上的事物是多的。</p>
+<p>那怎么办呢？我们首先要尊奉这样一个理念叫要事优先。应为我们把事物都写下来了，而且也用软件把所有的事情都记录下来了，所以我们可以标记出重要的事情。我们把这些事情叫做青蛙，青蛙不能太多，三只足矣。三只是一个概述，做完三件重要的事，你其实可以标注新的三件重要的事。当我们能够从清单中间找到要事，我们也能够优先处理要事。我们就会让自己的工作和生活就在不断出成果。即使你一早起来不能够吃青蛙，但你也可以做到要事优先。比如说你可以做日程表上的事情，到点就要做。比如说你要给某个人下午两点打电话或见某一个人。那你在特定的时间你一定要完成。除此之外，你就打开你整个的清单。你的清单上面有很多事，你就首先看到你现在所在的这个情景。比如说你在公司，你觉得这里可以办公又没有人打扰，你就可以先吃掉这个情景下最重要的青蛙。也许你在做的过程中有紧急的事情发生，你有两个小方案去对付他。第一临时处理一下，回过头来还是要去处理重要的事情。第二你这件事情不足让你停下手中的事情，你就可以先记录下来，等做完手中的事情，你再去处理。其实这就是我们讲的青蛙的理论，其实当我们运用GTD的思想，能够把所有的事情记录下来，我们就能够对其进行分类，当我们有了分类之后，我们就可以标出那些事情是重要的。我们就可以根据情景去完成。</p>
+<p>当然你可能听了这么多节课，你还是做不到。很多人回复我他还是做不到，他有拖延症，这是另外一个问题。我们会在后续的课程陆续分享。今天我们的核心讲的是吃青蛙的理论，这必须建立对事件进行收集和分类。我们把他称作为收集、排序和执行。这三个流程足以让我们能够收集所有的事物，对事物进行分类轻重缓急，然后挑出要事，执行的时候我们就是要去做要事。</p>
+<p>下一节课我们来讲讲执行时怎么回事，怎样才能完成清单上的事情。</p>
+<h1 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h1><p>事情比较多的时候，我们需要对事情进行分类，分类管理我们就能够根据情景处理相关的事情。今后要多采用清单+青蛙的方法处理事情。</p>
+<p>参考文献：<br>原文链接:无</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 效能 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 效能 </tag>
+            
+            <tag> 时间管理 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[叶武滨说时间管理|什么样的计划才能赶上变化？【06】转载]]></title>
+      <url>/2018/01/14/%E5%8F%B6%E6%AD%A6%E6%BB%A8%E8%AF%B4%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%7C%E4%BB%80%E4%B9%88%E6%A0%B7%E7%9A%84%E8%AE%A1%E5%88%92%E6%89%8D%E8%83%BD%E8%B5%B6%E4%B8%8A%E5%8F%98%E5%8C%96%E3%80%9006%E3%80%91/</url>
+      <content type="html"><![CDATA[<h1 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h1><p>大家好，我是易效能的叶武滨老师。</p>
+<p>今天我来分享上一节我们延续的话题—情境管理！这时我就不得不跟大家分享一个非常重要的理念：管理时间也好，管理事件也罢，其实就是把事件进行分类，事件分类了以后，我们就要根据情境来做安排了。</p>
+<p>什么是情境呢？情境就是你有多少时间，你在什么样的一个空间，你当时的体能精力怎么样。举个例子：堵车。我们在堵车的时候，我们的时间很多，我们这个空间也很狭窄。如果你开车更不方便，不开车，在车里的空间也很狭窄，我觉得也许你忙碌了一天；也许你很焦虑，要赶着去上班……那这时候你的精力，或者叫能量就不高，这时你想你可以做什么呢？其实你能做的事，不应该是很重要的，你做的事应该是相对比较简单的。比如说：如果我不开车，我就会冥想一下，或者静养一下，闭目养神；或者，我这时候就打开我的Omnifocus系统，看看我的类型清单，比如“电话”，我就调出电话清单，看看哪些是相对比较重要的，我就来拨打。打开清单看一看，不是要把这清单上所有的事情做完，而是选择适合我当下情境的事情来完成。所以这时候就回到了我们上节课所讲的：事件的分类—第一个是日程表；第二个有截止日的清单；第三个是没有截止日，按照情境来分的清单，比如说打电话，比如说在家，比如说电脑……这些细分的清单，它就构成了我们的一个系统。</p>
+<p>日历上的事情少，但是它是特定时间要完成的事情，所以它必须非常严谨，迟到了不行，早到太多也不好。这是一类我们要非常严谨。</p>
+<p>第二类就是我们有截止日的清单，那这类事情对时间要求没那么高，但是也需要在有个截止日之前完成。那日程和有截止日的清单，这两大类的事情，我们不要太多，但是我们要保持严谨，因为到了就必须得做。</p>
+<p>对于第三类按情境来分的事情，我们有很多，这时我们就要按照情境来分，然后根据情境来做。这也是非常重要的一个分类：由重要&amp;少，以及由相对不重要&amp;多，这样的标准来把它分成这3类。</p>
+<p>我们的生活和工作中，总是有突发事件的发生，在这种变化的时代，如果我们安排过多严谨的、固定的日程事件，那就会让我们觉得很焦虑、很着急。当安排得少，我们就很从容，然后我们就在不同的情境下去匹配做不同的事情的时候，我们就显得游刃有余。</p>
+<p>所以今天我想跟大家分享的一句话叫：“保持严谨，但不失灵活性。”严谨指的是：日程表和清单上的事物，我们在特定时间一定要完成的；灵活指的是：按照情境去生成的各种各样的清单，当我们在不同的情境，根据清单去完成不同的事情。这样我们把重要的事情放在日程，特定时间的也放在日程，这样就做到要事优先，但是它是少而精的。</p>
+<p>然后80%的事情，我们放在按情境分解的，它不着急，然后又能让我们去提前，又符合情境，这样不就是很完美了吗？听到今天的课程，你会越来越觉得：我们不能靠大脑。因为大脑无法去记忆，也无法去分类。因为我们连排3个水果的大小，是比较容易的，但是排7个水果的大小就很困难，所以我们大脑是不善于记忆，也不善于管理多而且复杂的事件。我们的事情远远比西瓜和柠檬比大小来得复杂。那我们怎么来选出重要性呢？比较难！所以我们只有把它们全部记录下来，才能对事情进行分类，才能按照我讲的那3类进行分解，然后我们才能够首先保证日程表上的事情被完成，其次才能去完成那些按情境去分解的，这样就叫相得益彰，难易相成。</p>
+<p>大脑很难去做到这样的管理，那怎么办呢？那我们就靠外在的系统，外在的移动手机、电脑，甚至纸笔也可以，纸笔也不贵，适合当今社会越来越忙碌的你的需要。</p>
+<p>这一讲我们就讲到这里，谢谢你的收听！ </p>
+<h1 id="感悟"><a href="#感悟" class="headerlink" title="感悟"></a>感悟</h1><p>生活中面临的事情比较多，我们需要借助外部工具帮助我们对事情进行分类管理。这样我们就能够从容面对所有事情。</p>
+<p>参考文献：<br>原文链接:<a href="https://mp.weixin.qq.com/s?__biz=MjM5NjcxMDAxMw==&amp;mid=2650201443&amp;idx=1&amp;sn=f059dd0e541709acead60c29fddc4871&amp;scene=21#wechat_redirect" target="_blank" rel="external">https://mp.weixin.qq.com/s?__biz=MjM5NjcxMDAxMw==&amp;mid=2650201443&amp;idx=1&amp;sn=f059dd0e541709acead60c29fddc4871&amp;scene=21#wechat_redirect</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 效能 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 效能 </tag>
+            
+            <tag> 时间管理 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[叶武滨说时间管理|管理时间的核心是事件的分类【05】转载]]></title>
       <url>/2018/01/10/%E5%8F%B6%E6%AD%A6%E6%BB%A8%E8%AF%B4%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%7C%E7%AE%A1%E7%90%86%E6%97%B6%E9%97%B4%E7%9A%84%E6%A0%B8%E5%BF%83%E6%98%AF%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%88%86%E7%B1%BB%E3%80%9005%E3%80%91/</url>
       <content type="html"><![CDATA[<h1 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h1><p>大家好，我易效能的叶武滨老师。</p>
 <p>今天我们继续来谈一谈，把大脑里所有的事情记录下来之后，我们要做什么？我们人的欲望真的非常多，我们的想法也很多，我们的点子也很多，如果有一个工具，甚至哪怕是纸笔，那我们也可以把我们所知道的都写下来，那这也是一件非常非常好的一个开始。</p>
@@ -737,7 +1030,7 @@
 <p> ###### Header 6</p>
 <p>### Links and Email</p>
 <p>#### Inline</p>
-<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#109;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#x75;&#114;&#x61;&#x6e;&#x75;&#115;&#106;&#x72;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#99;&#x6f;&#x6d;&#92;">&#x75;&#114;&#x61;&#x6e;&#x75;&#115;&#106;&#x72;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#99;&#x6f;&#x6d;&#92;</a></p>
+<p>Just put angle brackets around an email and it becomes clickable: \<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#x3a;&#117;&#x72;&#97;&#x6e;&#117;&#115;&#x6a;&#x72;&#x40;&#103;&#x6d;&#97;&#x69;&#108;&#46;&#x63;&#111;&#x6d;&#92;">&#117;&#x72;&#97;&#x6e;&#117;&#115;&#x6a;&#x72;&#x40;&#103;&#x6d;&#97;&#x69;&#108;&#46;&#x63;&#111;&#x6d;&#92;</a></p>
 <p><code>\&lt;uranusjr@gmail.com\&gt;</code></p>
 <p>Same thing with urls: \<a href="http://macdown.uranusjr.com\" target="_blank" rel="external">http://macdown.uranusjr.com\</a></p>
 <p><code>\&lt;http://macdown.uranusjr.com\&gt;</code></p>
