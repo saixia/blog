@@ -87,30 +87,30 @@
 
 
 
-<meta name="description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta name="description" content="Introduction to Decision Tree Algorithm Decision Tree Algorithm  Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision">
 <meta name="keywords" content="Algorithm,Decision tree,算法,决策树">
 <meta property="og:type" content="article">
 <meta property="og:title" content="How decision tree algorithm works 转载">
 <meta property="og:url" content="http://saixia.me/2018/03/09/Algorithm How decision tree algorithm works/index.html">
 <meta property="og:site_name" content="Seth&#39;s blog">
-<meta property="og:description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta property="og:description" content="Introduction to Decision Tree Algorithm Decision Tree Algorithm  Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20Algorithm.jpg">
 <meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20classifier.png">
 <meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20tree%20model%20example%20Image.jpg">
-<meta property="og:image" content="http://saixia.me/images/Example%20Construct%20a%20Decision%20Tree%20by%20using%20information%20gain%20as%20a%20criterion.png">
-<meta property="og:image" content="http://saixia.me/images/table1.jpeg">
-<meta property="og:image" content="http://saixia.me/images/table2.jpeg">
-<meta property="og:image" content="http://saixia.me/images/table3.jpeg">
-<meta property="og:image" content="http://saixia.me/images/info_gain_final.jpg">
-<meta property="og:image" content="http://saixia.me/images/Example%20Construct%20a%20Decision%20Tree%20by%20using%20gini%20index%20as%20a%20criterion.png">
-<meta property="og:image" content="http://saixia.me/images/table4.jpeg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Example%20Construct%20a%20Decision%20Tree%20by%20using%20information%20gain%20as%20a%20criterion.png">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/table1.jpeg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/table2.jpeg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/table3.jpeg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/info_gain_final.jpg">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Example%20Construct%20a%20Decision%20Tree%20by%20using%20gini%20index%20as%20a%20criterion.png">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/table4.jpeg">
 <meta property="og:image" content="http://saixia.me/images/table5.jpeg">
-<meta property="og:image" content="http://saixia.me/images/gini_final.jpg">
-<meta property="og:updated_time" content="2018-03-11T09:58:32.733Z">
+<meta property="og:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/gini_final.jpg">
+<meta property="og:updated_time" content="2018-03-11T10:10:12.833Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="How decision tree algorithm works 转载">
-<meta name="twitter:description" content="Introduction to Decision Tree Algorithm Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision tree algorithm can be use">
+<meta name="twitter:description" content="Introduction to Decision Tree Algorithm Decision Tree Algorithm  Decision Tree algorithm belongs to the family of supervised learning algorithms. Unlike other supervised learning algorithms, decision">
 <meta name="twitter:image" content="http://saixia.me/images/How%20Decision%20Tree%20Algorithm%20works/Decision%20Tree%20Algorithm.jpg">
 
 
@@ -431,6 +431,8 @@
 
       
         <h1 id="Introduction-to-Decision-Tree-Algorithm"><a href="#Introduction-to-Decision-Tree-Algorithm" class="headerlink" title="Introduction to Decision Tree Algorithm"></a>Introduction to Decision Tree Algorithm</h1><img src="/images/How Decision Tree Algorithm works/Decision Tree Algorithm.jpg" class="full-image">
+<center>Decision Tree Algorithm</center>
+
 <p>Decision Tree algorithm belongs to the family of <a href="https://dataaspirant.com/2014/09/19/supervised-and-unsupervised-learning/" target="_blank" rel="external">supervised learning algorithms</a>. Unlike other supervised learning algorithms, decision tree algorithm can be used for solving <a href="https://dataaspirant.com/2014/09/27/classification-and-prediction/" target="_blank" rel="external">regression and classification</a> problems too.</p>
 <p>The general motive of using Decision Tree is to create a training model which can use to predict class or value of target variables by <strong>learning decision rules</strong> inferred from prior data(training data).</p>
 <p>The understanding level of Decision Trees algorithm is so easy compared with other classification algorithms. The decision tree algorithm tries to solve the problem, by using tree representation. Each <strong>internal node</strong> of the tree corresponds to an attribute, and each <strong>leaf node</strong> corresponds to a class label.</p>
@@ -440,6 +442,8 @@
 <li>Repeat step 1 and step 2 on each subset until you find <strong>leaf nodes</strong> in all the branches of the tree.</li>
 </ol>
 <img src="/images/How Decision Tree Algorithm works/Decision Tree classifier.png" class="full-image">
+<center>Decision Tree classifier, Image credit: www.packtpub.com</center>
+
 <p>In decision trees, for predicting a class label for a record we start from the <strong>root</strong> of the tree. We compare the values of the root attribute with record’s attribute. On the basis of comparison, we follow the branch corresponding to that value and jump to the next node.</p>
 <p>We continue comparing our record’s attribute values with other <strong>internal nodes</strong> of the tree until we reach a leaf node with predicted class value. As we know how the modeled decision tree can be used to predict the target class or the value. Now let’s understanding how we can create the decision tree model.</p>
 <h2 id="Assumptions-while-creating-Decision-Tree"><a href="#Assumptions-while-creating-Decision-Tree" class="headerlink" title="Assumptions while creating Decision Tree"></a>Assumptions while creating Decision Tree</h2><p>The below are the some of the assumptions we make while using Decision tree:</p>
@@ -450,6 +454,8 @@
 <li>Order to placing attributes as root or internal node of the tree is done by using some statistical approach.</li>
 </ul>
 <img src="/images/How Decision Tree Algorithm works/Decision tree model example Image.jpg" class="full-image">
+<center>Decision tree model example Image Credit: <a href="http://zhanpengfang.github.io/" target="_blank" rel="external">http://zhanpengfang.github.io/</a></center>
+
 <p>Decision Trees follow <strong>Sum of Product (SOP)</strong> representation. For the above images, you can see how <strong>we can predict can we accept the new job offer?  and Use computer daily?</strong> from traversing for the root node to the leaf node.</p>
 <p>It’s a sum of product representation. The Sum of product(SOP) is also known as Disjunctive <strong>Normal Form</strong>. For a class, every branch from the root of the tree to a leaf node having the same class is a conjunction(product) of values, different branches ending in that class form a disjunction(sum).</p>
 <p>The primary challenge in the decision tree implementation is to identify which attributes do we need to consider as the root node and each level. Handling this is know the attributes selection. We have different attributes selection measure to identify the attribute which can be considered as the root note at each level.</p>
@@ -472,16 +478,15 @@
 <p>By calculating <strong>entropy measure</strong> of each attribute we can calculate their <strong>information gain</strong>. Information Gain calculates the expected reduction in entropy due to sorting on the attribute. Information gain can be calculated.</p>
 <p>To get a clear understanding of calculating <strong>information gain &amp; entropy</strong>, we will try to implement it on a sample data.</p>
 <p><strong>Example: Construct a Decision Tree by using “information gain” as a criterion</strong></p>
-<img src="/images/Example Construct a Decision Tree by using information gain as a criterion.png" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/Example Construct a Decision Tree by using information gain as a criterion.png" class="full-image">
 <p>We are going to use this data sample. Let’s try to use information gain as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
 <p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
 <p>We have chosen some random values to categorize each attribute:</p>
-<img src="/images/table1.jpeg" class="full-image">
-<p>images</p>
+<img src="/images/How Decision Tree Algorithm works/table1.jpeg" class="full-image">
 <p>There are <strong>2 steps for calculating information gain for each attribute:</strong></p>
 <p>Calculate entropy of Target.<br>Entropy for every attribute A, B, C, D needs to be calculated. Using information gain formula we will subtract this entropy from the entropy of target. The result is Information Gain.</p>
 <p><strong>The entropy of Target</strong>: We have 8 records with negative class and 8 records with positive class. So, we can directly estimate the entropy of target as 1.</p>
-<img src="/images/table2.jpeg" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/table2.jpeg" class="full-image">
 <p>Calculating entropy using formula:</p>
 <p>E(8,8) = -1<em>( (p(+ve)</em>log( p(+ve)) + (p(-ve)<em>log( p(-ve)) )<br>= -1</em>( (8/16)<em>log2(8/16)) + (8/16) </em> log2(8/16) )<br>= 1  </p>
 <h3 id="Information-gain-for-Var-A"><a href="#Information-gain-for-Var-A" class="headerlink" title="Information gain for Var A"></a>Information gain for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value  </p>
@@ -544,17 +549,17 @@
 </ul>
 <p>Entropy(Target, D) = P(&gt;=1.4) <em> E(0,5) + P(&lt; 1.4) </em> E(8,3)<br>= 5/16 <em> 0 + (11/16) </em> 0.84532 = 0.5811575</p>
 <p><strong>Information Gain(IG) = E(Target) - E(Target,D) = 1- 0.5811575 = 0.41189</strong></p>
-<img src="/images/table3.jpeg" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/table3.jpeg" class="full-image">
 <p>From the above Information Gain calculations, we can build a decision tree. We should place the attributes on the tree according to their values.</p>
 <p>An Attribute with better value than other should position as root and A branch with entropy 0 should be converted to a leaf node. A branch with entropy more than 0 needs further splitting.</p>
-<img src="/images/info_gain_final.jpg" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/info_gain_final.jpg" class="full-image">
 <h2 id="Gini-Index"><a href="#Gini-Index" class="headerlink" title="Gini Index"></a>Gini Index</h2><p>Gini Index is a metric to measure how often a randomly chosen element would be incorrectly identified. It means an attribute with lower gini index should be preferred.</p>
 <p><strong>Example: Construct a Decision Tree by using “gini index” as a criterion</strong></p>
-<img src="/images/Example Construct a Decision Tree by using gini index as a criterion.png" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/Example Construct a Decision Tree by using gini index as a criterion.png" class="full-image">
 <p>We are going to use same data sample that we used for information gain example. Let’s try to use gini index as a criterion. Here, we have 5 columns out of which 4 columns have continuous data and 5th column consists of class labels.</p>
 <p>A, B, C, D attributes can be considered as predictors and E column class labels can be considered as a target variable. For constructing a decision tree from this data, we have to convert continuous data into categorical data.</p>
 <p>We have chosen some random values to categorize each attribute:</p>
-<img src="/images/table4.jpeg" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/table4.jpeg" class="full-image">
 <h3 id="Gini-Index-for-Var-A"><a href="#Gini-Index-for-Var-A" class="headerlink" title="Gini Index for Var A"></a>Gini Index for Var A</h3><p>Var A has value &gt;=5 for 12 records out of 16 and 4 records with value &lt;5 value.</p>
 <ul>
 <li>For Var A &gt;= 5 &amp; class == positive: 5/12</li>
@@ -613,7 +618,7 @@
 </ul>
 <p><strong>gini(Target, D) = (5/16) <em> 0+ (11/16) </em> 0.397 = 0.273</strong></p>
 <img src="/images/table5.jpeg" class="full-image">
-<img src="/images/gini_final.jpg" class="full-image">
+<img src="/images/How Decision Tree Algorithm works/gini_final.jpg" class="full-image">
 <h2 id="Overfitting"><a href="#Overfitting" class="headerlink" title="Overfitting"></a>Overfitting</h2><p>Overfitting is a practical problem while building a decision tree model. The model is having an issue of overfitting is considered when the algorithm continues to go deeper and deeper in the to reduce the training set error but results with an increased test set error i.e, Accuracy of prediction for our model goes down. It generally happens when it builds many branches due to outliers and irregularities in data.</p>
 <p>Two approaches which we can use to avoid overfitting are:</p>
 <ul>
@@ -633,6 +638,7 @@
 <li>Information gain in a decision tree with categorical variables gives a biased response for attributes with greater no. of categories.</li>
 <li>Calculations can become complex when there are many class labels.</li>
 </ol>
+<p><a href="https://dataaspirant.com/2017/01/30/how-decision-tree-algorithm-works/" target="_blank" rel="external">原文地址：欢迎大家交流。</a></p>
 
       
     </div>
