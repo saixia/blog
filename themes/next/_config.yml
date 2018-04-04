@@ -294,8 +294,8 @@ mathjax:
 
 # Disqus
 disqus:
-  enable: false
-  shortname:
+  enable: true
+  shortname: saixia
   count: true
 
 # Hypercomments
@@ -306,7 +306,7 @@ disqus:
 
 # changyan
 changyan:
-  enable: true
+  enable: false
   appid: cyt4Mszyk
   appkey: prod_84012c6583611e5d040e9308852b5267
 
